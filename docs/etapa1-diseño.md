@@ -6,7 +6,7 @@ FutbolStats es una plataforma para administrar torneos de fútbol profesional, r
 
 ## Alcance funcional
 
-Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Inscribir clubes con plantel ya armado y generar el fixture del torneo. Programar partidos con local/visitante, fechayhora, estadio y árbitros. Registrar eventos durante el juego y cerrar el estado del partido. Notificar goles, tarjetas rojas/amarillas. Gestionar contratos de jugadores y patrocinios. Consultar tabla de posiciones, goleadores y **¿valla menos vencida. Calcular xG y probabilidad de clasificación mediante estrategias intercambiables?**
+Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Inscribir clubes con plantel ya armado y generar el fixture del torneo. Programar partidos con local/visitante, fechayhora, estadio y árbitros. Registrar eventos durante el juego y cerrar el estado del partido. Notificar goles, tarjetas rojas/amarillas. Gestionar contratos de jugadores y patrocinios. Consultar tabla de posiciones, goleadores y ¿valla menos vencida. Calcular xG y probabilidad de clasificación mediante estrategias intercambiables?
 
 ## Actores del sistema
 
@@ -20,51 +20,27 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 
 ## Requerimientos funcionales
 
-* **RF01:** Administrar torneos (alta, modificación, consulta y baja) y avanzar su estado: planificado, en curso, finalizado. **\- Administrador \-**  
-* **RF02:** Administrar clubes (alta, modificación, consulta y baja) y su cuerpo técnico. **\- Administrador \-**   
-* **RF03**: Administrar estadios (alta, modificación, consulta y baja), con su dirección y condiciones. **\- Administrador \-**  
-* **RF04:** Administrar jugadores (alta, modificación, consulta y baja), con posición, número de camiseta y valor de mercado. **\- Administrador \-**  
-* **RF05:** Administrar entrenadores (alta, modificación, consulta y baja), con especialidad y licencia. **\- Administrador \-**  
-* **RF06:** Administrar árbitros (alta, modificación, consulta y baja), con categoría, colegio y clubes de los que es hincha. **\- Administrador \-**   
-* **RF07:** Gestionar los contratos de los jugadores (alta, transferencia y rescisión), conservando el historial de clubes. **\- Administrador \-**  
-* **RF08:** Inscribir un club en un torneo con su plantel. **\- Administrador \-**  
-* **RF09:** Generar el fixture del torneo (todos contra todos) a partir de los clubes inscriptos. **\- Administrador \-**  
-* **RF10:** Programar un partido con fecha y hora, estadio y terna arbitral, validando que no haya superposiciones. **\- Administrador \-**  
-* **RF11:** Cargar la nómina de cada club para un partido, con titulares y suplentes y sin jugadores suspendidos. **\- Operador del partido** \-   
-* **RF12:** Iniciar el partido, registrar sus eventos en vivo (goles, remates, tarjetas, cambios y faltas) y cerrar el partido. **\- Operador del partido \-**  
-* **RF13:** Anular un evento cargado por error sin borrarlo. **\- Operador del partido \-**   
-* **RF14:** Notificar goles, tarjetas (amarillas y rojas) y finales de partido a los suscriptores, por los canales que cada uno eligió. **\- Sistema → Suscriptores y Canales \-**   
-* **RF15:** Registrarse y elegir los clubes que sigue y los canales por los que recibe los avisos. **\- Suscriptor \-**   
-* **RF16:** Registrar patrocinios y sponsors a clubes y torneos. **\- Administrador \-**  
-* **RF17:** Emitir la tabla de posiciones, la lista de goleadores y la valla menos vencida de un torneo. **\- Analista \-**   
-* **RF18:** Calcular proyecciones: goles esperados (xG) y probabilidad de clasificación según el método que elija. **\- Analista \-**
-
-## Entidades
-
-* Fixture: organiza los partidos de un torneo.  
-* Estadios:  
-* Planteles: Plantel por inscripción de un club a un torneo  
-* Árbitros: grupo de árbitros designados a un partido  
-* Partidos: class “Partido”  
-* Eventos: abstract \- Evento: Gol, Remate, Tarjeta,Cambio y Falta.  
-* Persona Clase base para Jugador, Entrenador y Árbitro.  
-* Clubes: class “club”  
-* Entrenadores: class “entrenador”  
-* Jugadores: class “jugador”  
-* Sponsor: clase “sponsor”  
-* **Patrocinio ¿que va aca?**  
-* Suscriptor: class “suscriptor”, con clubes seguidos con  
-* Canales (enum): enum “Canal”  
-* **Analista: ¿que va aca?**  
-* Notificaciones: class “Notificacion”
+* **RF01** \- Administrador: Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros (alta, modificación, consulta y baja), y avanzar el estado de cada torneo. \- CU01  
+* **RF02** \- Administrador: Gestionar los contratos de los jugadores (alta, transferencia y rescisión), conservando el historial de clubes. \- CU02  
+* **RF03** \- Administrador: Inscribir un club en un torneo con su plantel de 18 a 30 jugadores. \- CU03  
+* **RF04** \- Administrador: Generar el fixture del torneo, todos contra todos, a partir de los clubes inscriptos. \- CU04  
+* **RF05** \- Administrador: Programar un partido con fecha y hora, estadio y terna arbitral, validando que no haya superposiciones. \- CU05 y CU14  
+* **RF06** \- Operador de partido: Cargar la nómina de cada club para un partido, con titulares y suplentes y sin jugadores suspendidos. \- CU06  
+* **RF07** \- Operador de partido: Iniciar un partido, registrar sus eventos en vivo (goles, remates, tarjetas, cambios y faltas) y cerrarlo. \- CU07  
+* **RF08** \- Operador de partido: Anular un evento cargado por error, sin borrarlo. \- CU08  
+* **RF09** \- Suscriptor: Recibir notificaciones de goles, tarjetas rojas y finales de partido por los canales que eligió. \- CU09  
+* **RF10** \- Suscriptor: Registrarse y elegir los clubes que sigue y los canales por los que recibe avisos. \- CU10  
+* **RF11** \- Administrador: Registrar sponsors y sus patrocinios a clubes y torneos. \- CU11  
+* **RF12** \- Analista estadístico: Emitir la tabla de posiciones, la lista de goleadores y la valla menos vencida de un torneo. \- CU12  
+* **RF13** \- Analista estadístico: Calcular proyecciones de goles esperados (xG) y de probabilidad de clasificación, con el método que elija. \- CU13
 
 ## Reglas de Negocio
 
 * **RN01** \- Estados del torneo \- PLANIFICADO, EN CURSO y FINALIZADO. Solo se permite avanzar al estado siguiente.  
 * **RN02** \- Inicio del torneo \- Un torneo requiere al menos 4 clubes inscriptos para que comience  
-* **RN03** \- Inscripción \- Un club no puede inscribirse más de una vez en el mismo torneo, y no se permiten nuevas inscripciones cuando el torneo esta EN CURSO. 	  
+* **RN03** \- Inscripción \- Un club no puede inscribirse más de una vez en el mismo torneo, y no se permiten nuevas inscripciones cuando el torneo está EN CURSO. 	  
 * **RN04** \- Fechas \- La fecha y hora de cada partido deben quedar dentro del período de su torneo.  
-* **RN05** \- Plantel \- Cada plantel de una inscripción contiene entre \*\* y \*\* jugadores  
+* **RN05** \- Plantel \- Cada plantel de una inscripción contiene entre 18 y 30       jugadores  
 * **RN06** \- Pertenencia \- Un jugador solo puede pertenecer a un club por vez dentro del mismo torneo.  
 * **RN07** \- Historial del jugador \- Los datos y estadísticas de un jugador se conservan aunque rescinda su contrato o quede libre. Cada paso por un club queda registrado con su fecha de inicio y fin.  
 * **RN08** \- Disponibilidad del estadio \- Un estadio no tiene que admitir partidos con menos de 3 horas de diferencia.  
@@ -91,45 +67,188 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 
 ## Supuestos 
 
-S01 \- Actores \- El enunciado no dice quien carga los datos, organiza el torneo ni programa los partidos: el actor “Administrador” será encargado de eso. Los eventos del partido los registra el “Operador del Partido”.  
-S02 \- Datos del torneo \- Cada torneo indica si es nacional o internacional, cuantos clubes clasifican y el puntaje de corte de años anteriores. Los carga el “Administrador” al crear el torneo.  
-S03 \- Fixture \- Se genera todos contra todos a una sola rueda. Si la cantidad de clubes es impar, en cada fecha un club queda libre. El fixture define los cruces y la localía; el estadio, la hora y la terna se asignan al programar cada partido.   
-S04 \- Nómina \- Antes de iniciar el partido, cada club presenta 11 titulares y hasta 7 suplentes, elegidos de su plantel inscripto en el torneo.   
-S05 \- Sanciones \- “Fecha siguiente” se interpreta como el próximo partido del club en ese torneo. Una expulsión por doble amarilla se trata como roja: 1 fecha de suspensión, y se notifica como tarjeta roja.   
-S06 \- Desempate \- “Resultado entre los clubes empatados” son los puntos que sacaron en los partidos entre ellos. Si siguen empatados o no se enfrentaron, se ordenan alfabéticamente.  
-S07 \- Proyección por promedio \- Los puntos proyectados son el promedio de puntos por partido multiplicado por la cantidad total de partidos del club. Si alcanzan el corte, la probabilidad es 100 %; si no, es el porcentaje que representan del corte.
-
-S08 \- Proyección por xG \- Se simulan los partidos que faltan 1.000 veces, usando el xG promedio de cada club para estimar sus goles. La probabilidad es el porcentaje de simulaciones en las que el club termina entre los clasificados.
+* **S01** \- Actores \- El enunciado no dice quien carga los datos, organiza el torneo ni programa los partidos: el actor “Administrador” será encargado de eso. Los eventos del partido los registra el “Operador del Partido”.  
+* **S02** \- Datos del torneo \- Cada torneo indica si es nacional o internacional, cuántos clubes clasifican y el puntaje de corte de años anteriores. Los carga el “Administrador” al crear el torneo.  
+* **S03** \- Fixture \- Se genera todos contra todos a una sola rueda. Si la cantidad de clubes es impar, en cada fecha un club queda libre. El fixture define los cruces y la localía; el estadio, la hora y la terna se asignan al programar cada partido.   
+* **S04** \- Nómina \- Antes de iniciar el partido, cada club presenta 11 titulares y hasta 7 suplentes, elegidos de su plantel inscripto en el torneo.   
+* **S05** \- Sanciones \- “Fecha siguiente” se interpreta como el próximo partido del club en ese torneo. Una expulsión por doble amarilla se trata como roja: 1 fecha de suspensión, y se notifica como tarjeta roja.   
+* **S06** \- Desempate \- “Resultado entre los clubes empatados” son los puntos que sacaron en los partidos entre ellos. Si siguen empatados o no se enfrentaron, se ordenan alfabéticamente.  
+* **S07** \- Proyección por promedio \- Los puntos proyectados son el promedio de puntos por partido multiplicado por la cantidad total de partidos del club. Si alcanzan el corte, la probabilidad es 100 %; si no, es el porcentaje que representan del corte.  
+* **S08** \- Proyección por xG \- Se simulan los partidos que faltan 1.000 veces, usando el xG promedio de cada club para estimar sus goles. La probabilidad es el porcentaje de simulaciones en las que el club termina entre los clasificados.
 
 ## Diagrama de Casos de Uso
 
-| FutbolStats  |
-| :---: |
+## ![][image1]
 
 ## Casos de Uso
 
 | CU01 |  |
 | :---- | :---- |
-| Nombre | Generar Fixture |
+| Nombre | Administrar datos del sistema |
 | Actor | Administrador |
-| Precondición |  |
-| Flujo Principal |  |
-| Flujo alternativo |  |
+| Precondición | Para modificar, consultar o dar de baja, el dato tiene que existir. |
+| Flujo Principal | El administrador elige que administrar (torneo, club, arbitro, estadio o entrenador) y la operación (alta, modificación, consulta o baja). Ingresa o modifica datos. El sistema valida que estén completos y sean correctos. El sistema guarda los cambios y confirma. |
+| Flujo alternativo | 3.a) Hay datos inválidos o incompletos: el sistema muestra error y vuelve al paso 2\. |
 
-plantilla
-
-| CU\*\* |  |
+| CU02 |  |
 | :---- | :---- |
-| Nombre |  |
-| Actor |  |
+| Nombre | Gestionar contratos  |
+| Actor | Administrador |
+| Precondición | El jugador y club tienen que existir |
+| Flujo Principal | El administrador selecciona el jugador. Elige la operación alta, transferencia o rescisión. El sistema actualiza el contrato y guarda el historial. |
+| Flujo alternativo | Si el jugador ya tiene un contrato vigente, no se puede dar de alta otro. |
+
+| CU03 |  |
+| :---- | :---- |
+| Nombre | Inscribir club en torneo  |
+| Actor | Administrador |
+| Precondición | El torneo está planificado y el club existe |
+| Flujo Principal | El administrador selecciona el torneo y club. El sistema verifica que el club no esté inscripto en ese torneo. El administrador elige los jugadores del plantel. El sistema valida que esté todo correcto y registra la inscripción. |
+| Flujo alternativo | Si el plantel no tiene entre 18 y 30 jugadores, o el club ya estaba inscripto, el sistema no lo permite.  |
+
+| CU04 |  |
+| :---- | :---- |
+| Nombre | Generar Fixture  |
+| Actor | Administrador |
+| Precondición | El torneo tiene al menos 4 clubes inscriptos |
+| Flujo Principal | El administrador selecciona el torneo. El sistema arma los partidos todos contra todos. El sistema muestra el fixture. El administrador confirma y se crean los partidos (sin fecha, estadio ni terna) |
+| Flujo alternativo | La cantidad de clubes es impar: en cada fecha queda un club libre. |
+
+| CU05 |  |
+| :---- | :---- |
+| Nombre | Programar partido  |
+| Actor | Administrador |
+| Precondición | El partido existe en el fixture. |
+| Flujo Principal | El administrador selecciona el partido. El administrador asigna fecha, estadio y terna arbitral. El sistema valida los datos (CU14) El sistema guarda el partido como PROGRAMADO. |
+| Flujo alternativo | Si el estadio, algún club o algún árbitro no está disponible, el sistema lo rechaza (validaciones del paso 3\) |
+
+| CU06 |  |
+| :---- | :---- |
+| Nombre | Cargar nomina  |
+| Actor | Operador del partido |
+| Precondición | El partido está programado. |
+| Flujo Principal | El operador selecciona el partido y uno de los clubes. Elige los titulares y los suplentes del plantel inscripto. El sistema valida que todos estén en el plantel. El sistema guarda la nómina. Se repite el proceso con el otro club. |
+| Flujo alternativo | Si un jugador esta suspendido, no puede incluirse. |
+
+| CU07 |  |
+| :---- | :---- |
+| Nombre | Registrar partido en vivo  |
+| Actor | Operador del partido |
+| Precondición | El partido está programado y con las nóminas cargadas. |
+| Flujo Principal | El operador inicia el partido. El operador registra los eventos (goles, remates, tarjetas, cambios y faltas). El operador cierra el partido. El sistema actualiza el resultado y las estadísticas. |
+| Flujo alternativo | Si el evento no es valido (ej: es un cambio y el club ya hizo 5), el sistema lo rechaza. |
+
+| CU08 |  |
+| :---- | :---- |
+| Nombre | Anular evento  |
+| Actor | Operador del partido |
+| Precondición | El partido está en juego |
+| Flujo Principal | El operador selecciona el evento cargado por error. Ingresa el motivo. El sistema registra un evento de anulación asociado al original. |
+| Flujo alternativo | Si el evento ya fue anulado, no se puede anular de nuevo. |
+
+| CU09 |  |
+| :---- | :---- |
+| Nombre | Notificar hecho del partido  |
+| Actor | Suscriptor y Canales de comunicación |
+| Precondición | Se registró un gol, tarjeta o finalizó el partido |
+| Flujo Principal | El sistema arma la notificación con el partido, minuto y hecho. Busco los suscriptores que siguen a alguno de los clubes. Envía el aviso a cada suscriptor por cada canal que eligió. El sistema registra los envíos. |
+| Flujo alternativo | Si un canal falla, el sistema lo registra y sigue con los demás. |
+
+| CU10 |  |
+| :---- | :---- |
+| Nombre | Administrar suscripción  |
+| Actor | Suscriptor |
 | Precondición |  |
-| Flujo Principal |  |
-| Flujo alternativo |  |
+| Flujo Principal | El suscriptor ingresa su nombre, email y teléfono. Elige los clubes que quiere seguir. Elige los canales por los que quiere recibir los avisos. El sistema guarda la suscripción. |
+| Flujo alternativo | Si no elige ningún canal, el sistema le pide al menos uno. Elige un club que ya seguía: el sistema le muestra un mensaje. |
+
+| CU11 |  |
+| :---- | :---- |
+| Nombre | Gestionar patrocinios |
+| Actor | Administrador  |
+| Precondición | El club o torneo existe. |
+| Flujo Principal | El administrador registra un sponsor y elige el destinatario: club o torneo. Le asigna un patrocinio con montos y fechas. El sistema guarda la información. |
+| Flujo alternativo | Si el club ya tiene un sponsor principal vigente, el sistema lo rechaza. |
+
+| CU12 |  |
+| :---- | :---- |
+| Nombre | Emitir reportes  |
+| Actor | Analista |
+| Precondición | El torneo tiene partidos finalizados. |
+| Flujo Principal | El analista selecciona el torneo. Elige el reporte: tabla de posiciones, goleadores o valla menos vencida. El sistema lo calcula y lo muestra. |
+| Flujo alternativo | Si no hay partidos finalizados, el sistema informa que no hay datos. |
+
+| CU13 |  |
+| :---- | :---- |
+| Nombre | Calcular proyecciones |
+| Actor | Analista |
+| Precondición | El torneo tiene partidos finalizados |
+| Flujo Principal | El analista elige el tipo de proyección. Para el xG, elige un partido y un jugador o club, y el sistema suma el xG de sus remates. Para la probabilidad de clasificación, elige un club y el método (promedio de puntos o simulación con xG), y el sistema calcula el porcentaje. El sistema muestra el resultado. |
+| Flujo alternativo | Si el club todavía no jugó partidos, no se puede proyectar. |
+
+| CU14 |  |
+| :---- | :---- |
+| Nombre | Verificar disponibilidad  |
+| Actor |  |
+| Precondición | Se ingresaron la fecha, estadio y la terna del partido |
+| Flujo Principal | El sistema verifica que el estadio no tenga otro partido dentro de las 3 horas. Verifica que ningún club juegue otro partido dentro de las 48 horas. Verifica que ningún árbitro tenga otro partido ese día. |
+| Flujo alternativo | Si algo no está disponible, el sistema informa el motivo y no se programa el partido. |
 
 ## Diagrama de Clases Inicial
 
-|  |
-| :---: |
+1) Persona — Jugador, Entrenador, Árbitro (HERENCIA)  
+2) Torneo 1—0..\* Inscripción (COMPOSICIÓN)  
+3) Torneo — Partido (COMPOSICIÓN)  
+4) Evento — Gol, Remate, Tarjeta, Cambio, Falta, Anulación (HERENCIA)  
+5) Partido — Evento (COMPOSICIÓN)  
+6) Inscripción — Jugador (AGREGACIÓN)  
+7) Club — Entrenador (AGREGACIÓN)  
+8) Jugador — Contrato (COMPOSICIÓN)  
+9) Sponsor — Patrocinio (COMPOSICIÓN)  
+10)  EstadoTorneo (ENUM)  
+11)  EstadoPartido (ENUM)  
+12)  TipoGol (ENUM)  
+13)  Inscripción 0..\*—1 Club (ASOCIACIÓN)   
+14)  Contrato 0..\*—1 Club (ASOCIACIÓN)  
+15)  Partido 0..\*—2 Club (ASOCIACIÓN)  
+16)  Partido 0..\*—1 Estadio (ASOCIACIÓN)  
+17)  Partido 0..\*—3 Árbitro (terna) (ASOCIACIÓN)  
+18)  Evento 0..\*—1 Jugador (ASOCIACIÓN)  
+19)  Cambio 0..\*—1 Jugador (ASOCIACIÓN)  
+20)  Anulación 0..1—1 Evento (ASOCIACIÓN)  
+21)  Patrocinio 0..\*—0..1 Club (ASOCIACIÓN)  
+22)  Patrocinio 0..\*—0..1 Torneo (ASOCIACIÓN)  
+23)  Suscriptor 0..\*—1..\* Club (ASOCIACIÓN)  
+24)  ZonaRemate (ENUM)  
+25)  ColorTarjeta (ENUM)  
+26)  Canal (ENUM)  
+27) Torneo  
+28) Contrato  
+29) Nómina  
+30) TernaArbitral  
+31) Sancion  
+32) EnvioNotificacion
+
+## Entidades
+
+* Fixture: organiza los partidos de un torneo.  
+* Estadios:  
+* Planteles: Plantel por inscripción de un club a un torneo  
+* Árbitros: grupo de árbitros designados a un partido  
+* Partidos: class “Partido”  
+* Eventos: abstract \- Evento: Gol, Remate, Tarjeta,Cambio y Falta.  
+* Persona Clase base para Jugador, Entrenador y Árbitro.  
+* Clubes: class “club”  
+* Entrenadores: class “entrenador”  
+* Jugadores: class “jugador”  
+* Sponsor: clase “sponsor”  
+* Patrocinio clase  
+* Suscriptor: class “suscriptor”, con clubes seguidos con  
+* Canales (enum): enum “Canal”  
+* **Analista: ¿que va aca?**  
+* Notificaciones: class “Notificacion”  
+* CanalNotificacion: interfaz  
+* Inscripcion: 
 
 ## Diagrama de Secuencia
 
@@ -148,4 +267,3 @@ plantilla
 | :---: |
 
 ## 
-
