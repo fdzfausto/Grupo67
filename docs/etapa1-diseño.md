@@ -229,6 +229,8 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 31) Sancion  
 32) EnvioNotificacion
 
+![][image2]
+
 ## Entidades
 
 * Fixture: organiza los partidos de un torneo.  
@@ -257,9 +259,71 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 
 ## Aplicación de principios SOLID
 
-## 
+1) ## **Principio: Responsabilidad Única (S)**
+
+   1) **Problema:** en el diagrama inicial, la clase “Torneo” hace demasiadas cosas: inscribe clubes, genera el fixture, arma la tabla de posiciones, calcula goleadores, valla menos vencida y proyecciones. Posee un montón de funciones que pueden sobrecargar la clase.  
+   2) **Decisión:** se saca un par de métodos de la clase Torneo. Torneo solo queda con las inscripciones, el estado y el fixture. Los reportes pasan a una nueva clase llamada ServicioReportes.  
+   3) **Clases:** Torneo y ServicioReportes.  
+   4) **Ventaja:** las clases son más chicas y fáciles de entender. Un cambio en los reportes no afecta la organización del torneo.  
+        
+2) **Principio: Cerrado/Abierto (O)**  
+   1) **Problema:** en el diagrama, hay dos lugares donde agregar algo nuevo obliga a modificar código que ya funciona:  
+      1) **Canales**: en el diagrama de secuencia del CU07, la clase “Notificacion” envía cada aviso con un switch sobre el enum Canal (APP\_MOVIL/CORREO/SMS). Para sumar WhatsApp hay que modificar ese switch, y la RN22 pide lo contrario.  
+      2) **Proyecciones:** en el diagrama de clases inicial, Torneo tiene el metodo “calculaProbabilidadClasificacion(club, metodo: String), que elige el cálculo con un “if”. Un método nuevo obliga a modificar Torneo (RN28).  
+   2) **Decisión:**   
+      1) Crear la interfaz “CanalNotificacion”, implementada por AppMovil,CorreoPrensa y Sms.  
+      2) Crear la interfaz “MetodoProyeccion”, implementada por ProyeccionPorPromedio y ProyeccionPorXG.   
+   3) **Clases:** “CanalNotificacion” con sus 3 implementaciones y “MetodoProyeccion” con sus 2 implementaciones.  
+   4) **Ventajas:** un canal o un metodo nuevo es una clase nueva y no se toca lo que ya funciona.
+
+3) **Principio: Inversión de Dependencias (D)**  
+   1) **Problema**: en el diseño inicial, como se ve en el CU07, Notificación depende directamente de cada canal concreto, porque tiene que saber cómo se envía por app, por correo y por SMS. Cualquier cambio en un canal obliga a modificar Notificación, y no se la puede probar por separado sin enviar mensajes reales.   
+   2) **Decisión:** se crea ServicioNotificaciones que trabaja solo con la interfaz CanalNotificacion. De la misma forma, ServicioReportes trabaja con la interfaz MetodoProyeccion.  
+   3) Clases: ServicioNotificaciones, CanalNotificacion, ServicioReportes, MetodoProyeccion.  
+   4) **Ventaja:** ServicioNotificaciones y ServicioReportes, que contienen la lógica del negocio, no dependen de los canales ni de los métodos de proyección concretos, sino de sus interfaces. Se puede cambiar o agregar un canal o un método sin modificar esas dos clases, y se las puede probar por separado. 
 
 ## Aplicación de principios GRASP
+
+1) **Principio: Experto en Información**  
+   1) **Problema:** en el diagrama de clases, Partido guarda los goles en dos atributos aparte (golesLocal y golesVisitante), aunque esa informacion ya está en su lista de eventos. El mismo dato esta en dos lugares: si se anula un gol y no se actualizan esos atributos, el marcador queda mal.
+
+**Ejemplo con el diseño inicial:** River mete un gol a los 10’, Boca a los 50’ y luego River mete otro a los 75’ pero se estaba en offside y se lo anulan. Partido guarda el marcador en dos lugares: en su lista de eventos (3 goles y la anulación) y en los atributos “golesLocal=2” y “golesVisitante \= 1”. Al anular el gol del minuto 60, la lista de eventos ya refleja la anulación. Pero si nadie se acuerda de restar 1 a golesLocal, ese atributo sigue diciendo 2\. El resultado es: el sistema muestra River 2 – Boca 1, cuando en realidad es 1 a 1\. La tabla de posiciones y los goleadores también quedan mal. 
+
+2) **Decisión:** cada pregunta la responde la clase que tiene los datos para hacerlo:  
+   1) Partido calcula los goles de un club con “getGoles(club)”, recorriendo sus eventos, y se eliminan los atributos “golesLocal” y “golesVisitante”.  
+      2) Suscriptor responde si sigue a un club con “sigueA(club), porque tiene su lista de clubes, como se ve en el diagrama de secuencia del CU10.   
+   3) **Clases**: Partido, Evento, Gol y Suscriptor  
+   4) **Ventajas:** cada dato vive en un solo lugar, así que no puede quedar desactualizado. Las demás clases no necesitan saber cómo está armada Partido o Suscriptor por dentro: solo le preguntan y reciben la respuesta.   
+        
+2) **Principio: Creador**   
+   1) **Problema**: hay que definir que clase crea cada objeto. Si cualquier clase pudiera crear, por ejemplo, un Gol y agregarlo a un partido, se podrían saltear reglas de negocio: cargar un gol en un partido que no esta EN\_JUEGO, o de un jugador que no está en la nómina.  
+   2) **Decision:** cada objeto lo crea la clase que lo contiene o que tiene los datos para crearlo:  
+      1) Partido: crea sus eventos (Gol, Tarjeta, etc.) y la Notificación.  
+      2) Torneo: crea sus Inscripciones y los Partidos del fixture.  
+      3) Jugador: crea sus contratos al transferirse.  
+   3) **Clases:** Partido, Gol, Notificación, Torneo, Inscripción, Jugador y Contrato.  
+   4) **Ventajas:** el que crea el objeto valida las reglas en ese momento. Por ejemplo; en el CU07, Partido crea el Gol solo después de verificar que el partido está EN\_JUEGO y que los datos son válidos. Así no pueden existir eventos inválidos ni sueltos, sin un partido al que pertenezcan.   
+        
+3) **Principio: Controlador**  
+   1) **Problema:** en el diagrama de secuencia CU07, el operador le habla directo a Partido. Eso significa que la interfaz del usuario tendria las clases del modelo (Gol, Partido, Notificacion) y el orden en que se usan.Si después quieren cambiar el menú por consola por una interfaz gráfica, habría que rehacer toda esa lógica.  
+   2) **Decision:** se agregan Controladores (ControladorTorneo, ControladorPartido y ControladorReportes), que reciben las acciones del usuarios y las delegan en las clases del modelo.  
+   3) **Clases:** ControladorTorneo, ControladorPartido y ControladorReportes.  
+   4) **Ventajas:** la interfaz queda separada del modelo. Se puede reemplazar el menú por consola por una interfaz gráfica sin modificar las clases del negocio.   
+        
+4) **Principio: Polimorfismo**  
+   1) **Problema:** cada tipo de evento, canal o metodo de proyeccion se comportan de diferentes maneras. Ejemplo; a cualquier evento se le puede pedir “obtenerDescripcion()” y cada tipo responde distinto:  
+      1) Gol: “Gol de Messi (min 35)”  
+      2) Tarjeta: “Tarjeta Roja para Marcos Rojo (min 4)”  
+      3) Cambio: “Sale Andrada, entra Pereira (min 60)”.
+
+      Sin polimorfismo, para mostrar un evento habría que preguntar con if o switch si es un gol, una tarjeta o un cambio, y repetir esa pregunta en cada lugar donde se use. Para agregar un tipo nuevo habría que modificar todos esos lugares. 
+
+   2) **Decisión:** cada subclase o implementación responde al mismo mensaje a su manera:  
+      1) Gol, Tarjeta, Cambio, Falta y Anulación sobrescriben obtenerDescripcion(), y Gol además golesPara(club);  
+      2) AppMovil, CorreoPrensa y Sms implementan `enviar()`;  
+      3) ProyeccionPorPromedio y ProyeccionPorXG implementan calcular().  
+   3) **Clases**: Evento y sus subclases, CanalNotificacion y sus implementaciones, MetodoProyeccion y sus implementaciones.  
+   4) **Ventaja:** desaparecen los condicionales por tipo. Por ejemplo, para describir cualquier evento alcanza con evento.obtenerDescripcion(), y un tipo nuevo de evento, canal o método se agrega sin modificar el código que lo usa. 
 
 ## Diagrama de Clases Final
 
@@ -267,3 +331,4 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | :---: |
 
 ## 
+
