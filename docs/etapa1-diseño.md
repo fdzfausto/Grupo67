@@ -78,7 +78,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 
 ## Diagrama de Casos de Uso
 
-## ![][image1]
+![Diagrama de casos de uso](diagramas_UML/caso_de_uso.png)
 
 ## Casos de Uso
 
@@ -229,7 +229,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 31) Sancion  
 32) EnvioNotificacion
 
-![][image2]
+(Ver archivo "Diagrama de clases inicial.drawio" en la raíz del repositorio)
 
 ## Entidades
 
