@@ -411,8 +411,7 @@ El suscriptor ingrese sus datos, elige los clubes que sigue (si ya seguía algun
 
 # **Diagrama de Clases Final** {#diagrama-de-clases-final}
 
-|  |
-| :---: |
+## ***(diagrama de clases final disponible en el repositorio)***
 
 ## ---
 
