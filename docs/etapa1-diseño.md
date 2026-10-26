@@ -1,14 +1,99 @@
-# ***Trabajo Práctico Obligatorio Programación Orientada a Objetos***
+**Trabajo Práctico Obligatorio \- Programación Orientada a Objetos**  
+**Etapa 1: Modelado y Diseño del sistema**  
+---
 
-## Presentación
+**Índice**
+
+[**Propuesta e Integrantes	1**](#propuesta-e-integrantes)
+
+[**Presentación	1**](#presentación)
+
+[**Alcance funcional	2**](#alcance-funcional)
+
+[**Entidades del sistema	2**](#entidades-del-sistema)
+
+[**Actores del sistema	3**](#actores-del-sistema)
+
+[**Requerimientos funcionales	4**](#requerimientos-funcionales)
+
+[**Reglas de Negocio	5**](#reglas-de-negocio)
+
+[**Supuestos	7**](#supuestos)
+
+[**Diagrama de Casos de Uso	9**](#diagrama-de-casos-de-uso)
+
+[**Casos de usos	9**](#casos-de-usos)
+
+[**Diagrama de Clases Inicial	15**](#diagrama-de-clases-inicial)
+
+[**Diagrama de Secuencia	17**](#diagrama-de-secuencia)
+
+[**Aplicación de principios SOLID	17**](#aplicación-de-principios-solid)
+
+[**Aplicación de principios GRASP	18**](#aplicación-de-patrones-grasp)
+
+[**Diagrama de Clases Final	21**](#diagrama-de-clases-final)
+
+[**Nota de cambios respecto al diagrama de clases inicial	21**](#nota-de-cambios-respecto-al-diagrama-de-clases-inicial)
+
+---
+
+# **Propuesta e Integrantes** {#propuesta-e-integrantes}
+
+La propuesta seleccionada fue la opción C \- FutbolStats (gestion y analitica de torneos de futbol).
+
+Integrantes:
+
+* Fausto Fernandez  
+* Ignacio Mendes  
+* Luka Kishima
+
+---
+
+# **Presentación** {#presentación}
 
 FutbolStats es una plataforma para administrar torneos de fútbol profesional, registrar partidos en vivo, conservar estadísticas, notificar hechos relevantes y producir reportes y proyecciones. Este documento desarrolla la Etapa 1: análisis del problema, alcance funcional, entidades, actores, requerimientos funcionales, reglas de negocio, supuestos, diagrama de casos de uso, casos de uso, diagrama de clases inicial, diagrama de secuencia, aplicación de SOLID y GRASP y diagrama de clases final.
 
-## Alcance funcional
+---
 
-Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Inscribir clubes con plantel ya armado y generar el fixture del torneo. Programar partidos con local/visitante, fechayhora, estadio y árbitros. Registrar eventos durante el juego y cerrar el estado del partido. Notificar goles, tarjetas rojas/amarillas. Gestionar contratos de jugadores y patrocinios. Consultar tabla de posiciones, goleadores y ¿valla menos vencida. Calcular xG y probabilidad de clasificación mediante estrategias intercambiables?
+# **Alcance funcional** {#alcance-funcional}
 
-## Actores del sistema
+* Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros.  
+* Inscribir clubes con plantel ya armado y generar el fixture del torneo.  
+* Programar partidos con local/visitante, fechayhora, estadio y árbitros.  
+* Registrar eventos durante el juego y cerrar el estado del partido.   
+* Notificar goles, tarjetas rojas y finales de partido.  
+* Gestionar contratos de jugadores y patrocinios.  
+* Consultar tabla de posiciones, goleadores y valla menos vencida.   
+* Calcular xG y probabilidad de clasificación mediante estrategias intercambiables.
+
+---
+
+# **Entidades del sistema** {#entidades-del-sistema}
+
+| Entidad | Descripción |
+| ----- | ----- |
+| Torneo | Competencia con sus clubes inscriptos, su estado y fixture. |
+| Fixture | Organiza los partidos de un torneo. |
+| Club | Equipo que participa de los torneos. |
+| Estadio | Lugar donde se juegan los partidos. |
+| Persona | Clase base de Jugador, Entrenador y Árbitro |
+| Jugador / Entrenador / Árbitro | Personas que forman parte del sistema. |
+| Inscripción  | Registro de un club en un torneo, con su plantel. |
+| Contrato | Vínculo entre un jugador y un club, con las fechas. |
+| Partido | Encuentro entre dos clubes dentro de un torneo. |
+| Nomina | Titulares y suplentes de un club para un partido. |
+| Terna arbitral | Grupo de árbitros elegidos para un partido. |
+| Evento | Clase abstracta para Gol, Remate, Tarjeta, Cambio, Falta y Anulación. |
+| Sanción  | Suspensión de un jugador por tarjetas. |
+| Sponsor / Patrocinio | Empresa que patrocina y el acuerdo con un club o torneo. |
+| Suscriptor | Persona que sigue clubes y elige por qué canales recibe avisos. |
+| Notificacion / Envío | Aviso de un hecho del partido y el registro de cada envío. |
+| Canal | Medio por el cual se envía el aviso (app móvil, correo o SMS). |
+
+## ---
+
+# **Actores del sistema** {#actores-del-sistema}
 
 | Actor  | Qué hace en el sistema |
 | :---: | :---: |
@@ -18,7 +103,9 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Suscriptor | Se registra, elige qué clubes sigue y por qué canales, y recibe las notificaciones.  |
 | Canales de notificación  | Entregan cada aviso al suscriptor. Pueden fallar sin frenar la carga del partido.  |
 
-## Requerimientos funcionales
+---
+
+# **Requerimientos funcionales** {#requerimientos-funcionales}
 
 * **RF01** \- Administrador: Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros (alta, modificación, consulta y baja), y avanzar el estado de cada torneo. \- CU01  
 * **RF02** \- Administrador: Gestionar los contratos de los jugadores (alta, transferencia y rescisión), conservando el historial de clubes. \- CU02  
@@ -34,7 +121,9 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 * **RF12** \- Analista estadístico: Emitir la tabla de posiciones, la lista de goleadores y la valla menos vencida de un torneo. \- CU12  
 * **RF13** \- Analista estadístico: Calcular proyecciones de goles esperados (xG) y de probabilidad de clasificación, con el método que elija. \- CU13
 
-## Reglas de Negocio
+---
+
+# **Reglas de Negocio** {#reglas-de-negocio}
 
 * **RN01** \- Estados del torneo \- PLANIFICADO, EN CURSO y FINALIZADO. Solo se permite avanzar al estado siguiente.  
 * **RN02** \- Inicio del torneo \- Un torneo requiere al menos 4 clubes inscriptos para que comience  
@@ -46,7 +135,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 * **RN08** \- Disponibilidad del estadio \- Un estadio no tiene que admitir partidos con menos de 3 horas de diferencia.  
 * **RN09** \- Programación \- Un club no puede jugar dos partidos con menos de 48 horas de diferencia.  
 * **RN10** \- Árbitros \- Un partido requiere un árbitro principal y dos asistentes.  
-* **RN11** \- Estado del partido \- PROGRAMADO, EN JUEGO, FINALIZADO y SUSPENDIDO.  
+* **RN11** \- Estado del partido \- PROGRAMADO, EN JUEGO, FINALIZADO, SUSPENDIDO y SIN\_PROGRAMAR. Los partidos se crean sin programar y pasan a Programado cuando se les asignan los datos necesarios.  
 * **RN12** \- Registro de eventos \- Solo se pueden registrar eventos con el partido EN JUEGO. El jugador involucrado debe estar en la nómina de su club para ese partido.   
 * **RN13** \- Tiempo de evento \- El tiempo de partido es entre 0 y 120 minutos (incluido el tiempo adicional).  
 * **RN14** \- Gol y marcador \- Un gol puede ser a favor, en contra o de penal. El gol en contra suma al marcador del rival mientras que el gol de penal cuenta para el goleador si es a favor.  
@@ -55,7 +144,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 * **RN17** \- Anulación de eventos \- Un evento registrado no se elimina. Si hubo un error, se corrige con un evento de anulación asociado al original.  
 * **RN18** \- Sanciones \- Un jugador que acumula 5 tarjetas amarillas en el torneo queda suspendido para la fecha siguiente, y una roja directa implica 1 fecha de suspensión. Un jugador suspendido no puede incluirse en la nómina.  
 * **RN19** \- Impedimentos del arbitro \- Un árbitro no puede dirigir a un club que es hincha declarado ni tener otro partido el mismo día.   
-* **RN20** \- Notificaciones \- Cada gol, tarjeta y final del partido se notifica a los suscriptores que siguen a algunos de los clubes, por los canales que eligieron, indicando partido, minuto y hecho.  
+* **RN20** \- Notificaciones \- Cada gol, tarjeta roja y final del partido se notifica a los suscriptores que siguen a alguno de los clubes, por los canales que eligieron, indicando partido, minuto y hecho.  
 * **RN21** \- Fallo de canales \- Si un canal falla, se registra el error y se sigue con los demás, sin frenar la carga del partido. Un canal nuevo debe poder agregarse sin modificar la lógica de los partidos.   
 * **RN22** \- Patrocinios \- Un sponsor puede patrocinar varios clubes y torneos a la vez. Cada patrocinio tiene monto, fecha de inicio y fin, y solo puede haber uno vigente por sponsor y destinatario.  
 * **RN23** \- Sponsor principal \- Un club no puede tener más de un sponsor principal vigente a la vez.  
@@ -63,9 +152,11 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 * **RN25** \- Criterio de desempate en tabla de posiciones \- En caso de empate en puntos, la tabla de posiciones se ordenará aplicando primero la diferencia de gol, luego los goles a favor y finalmente el resultado directo entre los equipos involucrados.  
 * **RN26** \- Goleador y Valla menos vencida \- El goleador es el jugador con mas goles a favor: los de penal cuentan y los en contra no. La valla menos vencida es el club con el menor promedio de goles recibidos por partido.  
 * **RN27** \- Goles esperados (xG) \- Cada remate vale según la zona desde la que se patea: área chica 0.40, área grande 0.15, fuera del área 0.04 y penal 0.76. El xG de un jugador o de un club en un partido es la suma de sus remates.   
-* **RN28** \- Probabilidad de clasificación \- recen al menos dos métodos intercambiables: comparar los puntos proyectados con el corte de años anteriores, o simular los partidos restantes con el xG promedio de cada club. Se calcula al pedirla, no se guarda, y un método nuevo se agrega sin modificar los reportes que lo usan. 
+* **RN28** \- Probabilidad de clasificación \- recen al menos dos métodos intercambiables: comparar los puntos proyectados con el corte de años anteriores, o simular los partidos restantes con el xG promedio de cada club. Se calcula al pedirla, no se guarda, y un método nuevo se agrega sin modificar los reportes que lo usan.
 
-## Supuestos 
+---
+
+# **Supuestos**  {#supuestos}
 
 * **S01** \- Actores \- El enunciado no dice quien carga los datos, organiza el torneo ni programa los partidos: el actor “Administrador” será encargado de eso. Los eventos del partido los registra el “Operador del Partido”.  
 * **S02** \- Datos del torneo \- Cada torneo indica si es nacional o internacional, cuántos clubes clasifican y el puntaje de corte de años anteriores. Los carga el “Administrador” al crear el torneo.  
@@ -76,22 +167,26 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 * **S07** \- Proyección por promedio \- Los puntos proyectados son el promedio de puntos por partido multiplicado por la cantidad total de partidos del club. Si alcanzan el corte, la probabilidad es 100 %; si no, es el porcentaje que representan del corte.  
 * **S08** \- Proyección por xG \- Se simulan los partidos que faltan 1.000 veces, usando el xG promedio de cada club para estimar sus goles. La probabilidad es el porcentaje de simulaciones en las que el club termina entre los clasificados.
 
-## Diagrama de Casos de Uso
+---
 
-![Diagrama de casos de uso](diagramas_UML/caso_de_uso.png)
+# **Diagrama de Casos de Uso** {#diagrama-de-casos-de-uso}
 
-## Casos de Uso
+***(diagrama de casos de uso disponible en el repositorio)***
+
+## ---
+
+# **Casos de usos** {#casos-de-usos}
 
 | CU01 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Administrar datos del sistema |
 | Actor | Administrador |
 | Precondición | Para modificar, consultar o dar de baja, el dato tiene que existir. |
-| Flujo Principal | El administrador elige que administrar (torneo, club, arbitro, estadio o entrenador) y la operación (alta, modificación, consulta o baja). Ingresa o modifica datos. El sistema valida que estén completos y sean correctos. El sistema guarda los cambios y confirma. |
+| Flujo Principal | El administrador elige que administrar (torneo, club, jugador, árbitro, estadio o entrenador) y la operación (alta, modificación, consulta o baja). Ingresa o modifica datos. El sistema valida que estén completos y sean correctos. El sistema guarda los cambios y confirma. |
 | Flujo alternativo | 3.a) Hay datos inválidos o incompletos: el sistema muestra error y vuelve al paso 2\. |
 
 | CU02 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Gestionar contratos  |
 | Actor | Administrador |
 | Precondición | El jugador y club tienen que existir |
@@ -99,7 +194,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | Si el jugador ya tiene un contrato vigente, no se puede dar de alta otro. |
 
 | CU03 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Inscribir club en torneo  |
 | Actor | Administrador |
 | Precondición | El torneo está planificado y el club existe |
@@ -107,7 +202,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | Si el plantel no tiene entre 18 y 30 jugadores, o el club ya estaba inscripto, el sistema no lo permite.  |
 
 | CU04 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Generar Fixture  |
 | Actor | Administrador |
 | Precondición | El torneo tiene al menos 4 clubes inscriptos |
@@ -115,7 +210,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | La cantidad de clubes es impar: en cada fecha queda un club libre. |
 
 | CU05 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Programar partido  |
 | Actor | Administrador |
 | Precondición | El partido existe en el fixture. |
@@ -123,7 +218,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | Si el estadio, algún club o algún árbitro no está disponible, el sistema lo rechaza (validaciones del paso 3\) |
 
 | CU06 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Cargar nomina  |
 | Actor | Operador del partido |
 | Precondición | El partido está programado. |
@@ -131,7 +226,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | Si un jugador esta suspendido, no puede incluirse. |
 
 | CU07 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Registrar partido en vivo  |
 | Actor | Operador del partido |
 | Precondición | El partido está programado y con las nóminas cargadas. |
@@ -139,7 +234,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | Si el evento no es valido (ej: es un cambio y el club ya hizo 5), el sistema lo rechaza. |
 
 | CU08 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Anular evento  |
 | Actor | Operador del partido |
 | Precondición | El partido está en juego |
@@ -147,15 +242,15 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | Si el evento ya fue anulado, no se puede anular de nuevo. |
 
 | CU09 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Notificar hecho del partido  |
 | Actor | Suscriptor y Canales de comunicación |
-| Precondición | Se registró un gol, tarjeta o finalizó el partido |
+| Precondición | Se registró un gol, una tarjeta roja o finalizó el partido |
 | Flujo Principal | El sistema arma la notificación con el partido, minuto y hecho. Busco los suscriptores que siguen a alguno de los clubes. Envía el aviso a cada suscriptor por cada canal que eligió. El sistema registra los envíos. |
 | Flujo alternativo | Si un canal falla, el sistema lo registra y sigue con los demás. |
 
 | CU10 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Administrar suscripción  |
 | Actor | Suscriptor |
 | Precondición |  |
@@ -163,7 +258,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | Si no elige ningún canal, el sistema le pide al menos uno. Elige un club que ya seguía: el sistema le muestra un mensaje. |
 
 | CU11 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Gestionar patrocinios |
 | Actor | Administrador  |
 | Precondición | El club o torneo existe. |
@@ -171,15 +266,15 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | Si el club ya tiene un sponsor principal vigente, el sistema lo rechaza. |
 
 | CU12 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Emitir reportes  |
 | Actor | Analista |
-| Precondición | El torneo tiene partidos finalizados. |
+| Precondición | El torneo debe existir. |
 | Flujo Principal | El analista selecciona el torneo. Elige el reporte: tabla de posiciones, goleadores o valla menos vencida. El sistema lo calcula y lo muestra. |
 | Flujo alternativo | Si no hay partidos finalizados, el sistema informa que no hay datos. |
 
 | CU13 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Calcular proyecciones |
 | Actor | Analista |
 | Precondición | El torneo tiene partidos finalizados |
@@ -187,80 +282,66 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
 | Flujo alternativo | Si el club todavía no jugó partidos, no se puede proyectar. |
 
 | CU14 |  |
-| :---- | :---- |
+| ----- | :---- |
 | Nombre | Verificar disponibilidad  |
 | Actor |  |
 | Precondición | Se ingresaron la fecha, estadio y la terna del partido |
-| Flujo Principal | El sistema verifica que el estadio no tenga otro partido dentro de las 3 horas. Verifica que ningún club juegue otro partido dentro de las 48 horas. Verifica que ningún árbitro tenga otro partido ese día. |
+| Flujo Principal | El sistema verifica que el estadio no tenga otro partido dentro de las 3 horas. Verifica que ningún club juegue otro partido dentro de las 48 horas. Verifica que ningún árbitro tenga otro partido ese día. Verifica que ninguno de los árbitros sea hincha declarado del club local o visitante. |
 | Flujo alternativo | Si algo no está disponible, el sistema informa el motivo y no se programa el partido. |
 
-## Diagrama de Clases Inicial
+---
 
-1) Persona — Jugador, Entrenador, Árbitro (HERENCIA)  
-2) Torneo 1—0..\* Inscripción (COMPOSICIÓN)  
-3) Torneo — Partido (COMPOSICIÓN)  
-4) Evento — Gol, Remate, Tarjeta, Cambio, Falta, Anulación (HERENCIA)  
-5) Partido — Evento (COMPOSICIÓN)  
-6) Inscripción — Jugador (AGREGACIÓN)  
-7) Club — Entrenador (AGREGACIÓN)  
-8) Jugador — Contrato (COMPOSICIÓN)  
-9) Sponsor — Patrocinio (COMPOSICIÓN)  
-10)  EstadoTorneo (ENUM)  
-11)  EstadoPartido (ENUM)  
-12)  TipoGol (ENUM)  
-13)  Inscripción 0..\*—1 Club (ASOCIACIÓN)   
-14)  Contrato 0..\*—1 Club (ASOCIACIÓN)  
-15)  Partido 0..\*—2 Club (ASOCIACIÓN)  
-16)  Partido 0..\*—1 Estadio (ASOCIACIÓN)  
-17)  Partido 0..\*—3 Árbitro (terna) (ASOCIACIÓN)  
-18)  Evento 0..\*—1 Jugador (ASOCIACIÓN)  
-19)  Cambio 0..\*—1 Jugador (ASOCIACIÓN)  
-20)  Anulación 0..1—1 Evento (ASOCIACIÓN)  
-21)  Patrocinio 0..\*—0..1 Club (ASOCIACIÓN)  
-22)  Patrocinio 0..\*—0..1 Torneo (ASOCIACIÓN)  
-23)  Suscriptor 0..\*—1..\* Club (ASOCIACIÓN)  
-24)  ZonaRemate (ENUM)  
-25)  ColorTarjeta (ENUM)  
-26)  Canal (ENUM)  
-27) Torneo  
-28) Contrato  
-29) Nómina  
-30) TernaArbitral  
-31) Sancion  
-32) EnvioNotificacion
+# **Diagrama de Clases Inicial** {#diagrama-de-clases-inicial}
 
-(Ver archivo "Diagrama de clases inicial.drawio" en la raíz del repositorio)
+| Relaciones |  |  |
+| :---: | :---- | :---: |
+| 1  | Persona — Jugador, Entrenador, Árbitro  | HERENCIA |
+| 2 | Torneo 1—0..\* Inscripción | COMPOSICIÓN |
+| 3 | Torneo — Partido | COMPOSICIÓN |
+| 4 | Evento — Gol, Remate, Tarjeta, Cambio, Falta, Anulación | HERENCIA |
+| 5 | Partido — Evento  | COMPOSICIÓN |
+| 6 | Inscripción — Jugador | AGREGACIÓN |
+| 7 | Club — Entrenador | AGREGACIÓN |
+| 8 | Jugador — Contrato | COMPOSICIÓN |
+| 9 | Sponsor — Patrocinio | COMPOSICIÓN |
+| 10 | Inscripción 0..\*—1 Club  | ASOCIACIÓN |
+| 11 | Contrato 0..\*—1 Club | ASOCIACIÓN |
+| 12 | Partido 0..\*—2 Club | ASOCIACIÓN |
+| 13 | Partido 0..\*—1 Estadio | ASOCIACIÓN |
+| 14 | Partido 0..\*—3 Árbitro (terna) | ASOCIACIÓN |
+| 15 | Evento 0..\*—1 Jugador | ASOCIACIÓN |
+| 16 | Cambio 0..\*—1 Jugador | ASOCIACIÓN |
+| 17 | Anulación 0..1—1 Evento | ASOCIACIÓN |
+| 18 | Patrocinio 0..\*—0..1 Club | ASOCIACIÓN |
+| 19 | Patrocinio 0..\*—0..1 Torneo | ASOCIACIÓN |
+| 20 | Suscriptor 0..\*—1..\* Club  | ASOCIACIÓN |
 
-## Entidades
+**Enumeraciones**: EstadoTorneo, EstadoPartido, TipoGol, ZonaRemate, ColorTarjeta, Canal.  
+**Otras clases:** Nómina, TernaArbitral, Sanción y EnvioNotificacion. 
 
-* Fixture: organiza los partidos de un torneo.  
-* Estadios:  
-* Planteles: Plantel por inscripción de un club a un torneo  
-* Árbitros: grupo de árbitros designados a un partido  
-* Partidos: class “Partido”  
-* Eventos: abstract \- Evento: Gol, Remate, Tarjeta,Cambio y Falta.  
-* Persona Clase base para Jugador, Entrenador y Árbitro.  
-* Clubes: class “club”  
-* Entrenadores: class “entrenador”  
-* Jugadores: class “jugador”  
-* Sponsor: clase “sponsor”  
-* Patrocinio clase  
-* Suscriptor: class “suscriptor”, con clubes seguidos con  
-* Canales (enum): enum “Canal”  
-* **Analista: ¿que va aca?**  
-* Notificaciones: class “Notificacion”  
-* CanalNotificacion: interfaz  
-* Inscripcion: 
+***(diagrama de clases inicial disponible en el repositorio)***
 
-## Diagrama de Secuencia
+## ---
 
-|  |
-| :---: |
+# **Diagrama de Secuencia** {#diagrama-de-secuencia}
 
-## Aplicación de principios SOLID
+**CU07 \- Registrar Partido en vivo**
 
-1) ## **Principio: Responsabilidad Única (S)**
+El operador inicia el partido, registra los eventos mientras está EN JUEGO (con validación y rechazo de eventos inválidos), se notifican los goles y tarjetas rojas a los suscriptores por sus canales, y finalmente cierra el partido.
 
+***(diagrama de secuencia 1 disponible en el repositorio)***
+
+**CU10 \- Administrar Suscripción**
+
+El suscriptor ingrese sus datos, elige los clubes que sigue (si ya seguía alguno, se le avisa) y los canales (debe elegir al menos uno), y el sistema guarda la suscripción.
+
+***(diagrama de secuencia 2 disponible en el repositorio)***
+
+---
+
+# **Aplicación de principios SOLID** {#aplicación-de-principios-solid}
+
+1) **Principio: Responsabilidad Única (S)**  
    1) **Problema:** en el diagrama inicial, la clase “Torneo” hace demasiadas cosas: inscribe clubes, genera el fixture, arma la tabla de posiciones, calcula goleadores, valla menos vencida y proyecciones. Posee un montón de funciones que pueden sobrecargar la clase.  
    2) **Decisión:** se saca un par de métodos de la clase Torneo. Torneo solo queda con las inscripciones, el estado y el fixture. Los reportes pasan a una nueva clase llamada ServicioReportes.  
    3) **Clases:** Torneo y ServicioReportes.  
@@ -268,7 +349,7 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
         
 2) **Principio: Cerrado/Abierto (O)**  
    1) **Problema:** en el diagrama, hay dos lugares donde agregar algo nuevo obliga a modificar código que ya funciona:  
-      1) **Canales**: en el diagrama de secuencia del CU07, la clase “Notificacion” envía cada aviso con un switch sobre el enum Canal (APP\_MOVIL/CORREO/SMS). Para sumar WhatsApp hay que modificar ese switch, y la RN22 pide lo contrario.  
+      1) **Canales**: en el diagrama de secuencia del CU07, la clase “Notificacion” envía cada aviso con un switch sobre el enum Canal (APP\_MOVIL/CORREO/SMS). Para sumar WhatsApp hay que modificar ese switch, y la RN21 pide lo contrario.  
       2) **Proyecciones:** en el diagrama de clases inicial, Torneo tiene el metodo “calculaProbabilidadClasificacion(club, metodo: String), que elige el cálculo con un “if”. Un método nuevo obliga a modificar Torneo (RN28).  
    2) **Decisión:**   
       1) Crear la interfaz “CanalNotificacion”, implementada por AppMovil,CorreoPrensa y Sms.  
@@ -282,7 +363,9 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
    3) Clases: ServicioNotificaciones, CanalNotificacion, ServicioReportes, MetodoProyeccion.  
    4) **Ventaja:** ServicioNotificaciones y ServicioReportes, que contienen la lógica del negocio, no dependen de los canales ni de los métodos de proyección concretos, sino de sus interfaces. Se puede cambiar o agregar un canal o un método sin modificar esas dos clases, y se las puede probar por separado. 
 
-## Aplicación de principios GRASP
+---
+
+# **Aplicación de patrones GRASP** {#aplicación-de-patrones-grasp}
 
 1) **Principio: Experto en Información**  
    1) **Problema:** en el diagrama de clases, Partido guarda los goles en dos atributos aparte (golesLocal y golesVisitante), aunque esa informacion ya está en su lista de eventos. El mismo dato esta en dos lugares: si se anula un gol y no se actualizan esos atributos, el marcador queda mal.
@@ -296,13 +379,12 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
    4) **Ventajas:** cada dato vive en un solo lugar, así que no puede quedar desactualizado. Las demás clases no necesitan saber cómo está armada Partido o Suscriptor por dentro: solo le preguntan y reciben la respuesta.   
         
 2) **Principio: Creador**   
-   1) **Problema**: hay que definir que clase crea cada objeto. Si cualquier clase pudiera crear, por ejemplo, un Gol y agregarlo a un partido, se podrían saltear reglas de negocio: cargar un gol en un partido que no esta EN\_JUEGO, o de un jugador que no está en la nómina.  
-   2) **Decision:** cada objeto lo crea la clase que lo contiene o que tiene los datos para crearlo:  
-      1) Partido: crea sus eventos (Gol, Tarjeta, etc.) y la Notificación.  
-      2) Torneo: crea sus Inscripciones y los Partidos del fixture.  
-      3) Jugador: crea sus contratos al transferirse.  
-   3) **Clases:** Partido, Gol, Notificación, Torneo, Inscripción, Jugador y Contrato.  
-   4) **Ventajas:** el que crea el objeto valida las reglas en ese momento. Por ejemplo; en el CU07, Partido crea el Gol solo después de verificar que el partido está EN\_JUEGO y que los datos son válidos. Así no pueden existir eventos inválidos ni sueltos, sin un partido al que pertenezcan.   
+   1) **Problema**: En el diseño inicial, había que definir qué clases serían responsables de crear los objetos del sistema, para evitar que se generen inscripciones, partidos o contratos sin cumplir las reglas de negocio.  
+   2) **Decisión:** cada objeto lo crea la clase que lo contiene o que tiene los datos para crearlo:  
+      1) Torneo: crea sus Inscripciones de los clubes y los Partidos del fixture.  
+      2) Jugador: crea sus contratos mediante el método registrarContrato(), verificando que no tenga otro contrato vigente incompatible.  
+   3) **Clases:** Torneo, Inscripción, Jugador y Contrato.  
+   4) **Ventajas:** De esta manera, las clases responsables de crear los objetos pueden verificar las condiciones necesarias antes de hacerlo. Por ejemplo, torneo comprueba que un club no esté inscripto previamente antes de registrar una nueva inscripción. Esto permite evitar datos inválidos y mantener las reglas de negocio.  
         
 3) **Principio: Controlador**  
    1) **Problema:** en el diagrama de secuencia CU07, el operador le habla directo a Partido. Eso significa que la interfaz del usuario tendria las clases del modelo (Gol, Partido, Notificacion) y el orden en que se usan.Si después quieren cambiar el menú por consola por una interfaz gráfica, habría que rehacer toda esa lógica.  
@@ -325,10 +407,28 @@ Administrar torneos, clubes, estadios, jugadores, entrenadores y árbitros. Insc
    3) **Clases**: Evento y sus subclases, CanalNotificacion y sus implementaciones, MetodoProyeccion y sus implementaciones.  
    4) **Ventaja:** desaparecen los condicionales por tipo. Por ejemplo, para describir cualquier evento alcanza con evento.obtenerDescripcion(), y un tipo nuevo de evento, canal o método se agrega sin modificar el código que lo usa. 
 
-## Diagrama de Clases Final
+---
+
+# **Diagrama de Clases Final** {#diagrama-de-clases-final}
 
 |  |
 | :---: |
 
-## 
+## ---
+
+# **Nota de cambios respecto al diagrama de clases inicial** {#nota-de-cambios-respecto-al-diagrama-de-clases-inicial}
+
+En el diagrama de clases final realizamos varios cambios a partir de la aplicación de los principios SOLID y los patrones GRASP.
+
+Primero, separamos algunas responsabilidades. En el diagrama inicial, `Torneo` tenía métodos para generar reportes y calcular proyecciones. Decidimos trasladarlos a una nueva clase llamada `ServicioReportes`, para que `Torneo` se encargue principalmente de administrar los torneos.
+
+También incorporamos las interfaces `CanalNotificacion` y `MetodoProyeccion`, junto con sus respectivas implementaciones. Esto permite agregar nuevos canales de notificación o métodos de proyección sin tener que modificar las clases que los utilizan. Además, agregamos `ServicioNotificaciones` para administrar los envíos mediante la interfaz correspondiente.
+
+En cuanto a GRASP, eliminamos los atributos `golesLocal` y `golesVisitante` de `Partido` y agregamos el método `getGoles()`, para calcular el marcador a partir de los eventos y evitar guardar información duplicada. También incorporamos `sigueA()` en `Suscriptor` y `registrarContrato()` en `Jugador`, para que estas clases se encarguen de operaciones relacionadas con su propia información.
+
+Por otro lado, agregamos `ControladorTorneo`, `ControladorPartido` y `ControladorReportes`, que reciben las solicitudes del usuario y las delegan a las clases correspondientes. Mantuvimos la herencia de `Evento` y sus subclases, aprovechando el polimorfismo mediante `obtenerDescripcion()`.
+
+Por último, incorporamos el estado `sinProgramar` y ajustamos algunas multiplicidades de `Partido`, ya que al generar el fixture todavía no están asignados todos los datos del partido.
+
+Con estas modificaciones buscamos que las responsabilidades estén mejor distribuidas y que sea más sencillo agregar funcionalidades o realizar cambios en el sistema.
 
