@@ -1,11 +1,7 @@
-   # IntelliJ
-   .idea/
-   *.iml
-   out/
+# IntelliJ
+.idea/
+*.iml
+out/
 
-   # Java compilado
-   *.class
-
-   # Sistema
-   .DS_Store
-   Thumbs.db
+# Java compilado
+*.class
