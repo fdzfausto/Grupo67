@@ -1,15 +1,14 @@
 package modelo;
 
 import java.time.LocalDate;
-import java.util.Locale;
 
-public class Persona {
+public abstract class Persona {
     private String dni;
     private String nombre;
     private String apellido;
     private LocalDate fechaNacimiento;
 
-    public Persona(String dni, String nombre, String apellido, LocalDate fechaNacimiento) {
+    protected Persona(String dni, String nombre, String apellido, LocalDate fechaNacimiento) {
         this.dni = dni;
         this.nombre = nombre;
         this.apellido = apellido;
@@ -32,6 +31,7 @@ public class Persona {
         return fechaNacimiento;
     }
 
+    @Override
     public String toString() {
         return nombre + " " + apellido;
     }
