@@ -3,6 +3,7 @@ package modelo;
 import java.time.LocalDate;
 
 public class Entrenador extends Persona {
+    private static final long serialVersionUID = 1L;
     private String especialidad;
     private String licencia;
 
