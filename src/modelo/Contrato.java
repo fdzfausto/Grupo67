@@ -1,8 +1,10 @@
 package modelo;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class Contrato {
+public class Contrato implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Club club; // asociacion con Club
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
