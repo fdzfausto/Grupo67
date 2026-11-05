@@ -1,9 +1,6 @@
 package modelo;
 
-import java.io.Serializable;
-
-public class Estadio implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class Estadio {
     private String nombre;
     private int capacidad;
     private String direccion;

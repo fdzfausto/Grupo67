@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Jugador extends Persona {
-    private static final long serialVersionUID = 1L;
     private String posicion;
     private int numeroCamiseta;
     private double valorMercado;
