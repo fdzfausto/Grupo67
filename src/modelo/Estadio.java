@@ -10,7 +10,7 @@ public class Estadio implements Serializable {
     private String clima;
     private String terreno;
 
-    public Estadio(String nombre, int capacidad, String direccion, String clima) {
+    public Estadio(String nombre, int capacidad, String direccion, String clima, String tereno) {
         this.nombre = nombre;
         this.capacidad = capacidad;
         this.direccion = direccion;
