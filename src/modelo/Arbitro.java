@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Arbitro extends Persona { // herencia de Persona
+    private static final long serialVersionUID = 1L;
     private String categoria;
     private String colegio;
     private List<Club> clubesHincha; // asociacion con Club
