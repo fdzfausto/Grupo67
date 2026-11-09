@@ -28,6 +28,9 @@ public class Patrocinio implements Serializable {
         if (fechaInicio == null || fechaFin == null) {
             throw new ReglaNegocioException("Faltan las fechas del patrocinio");
         }
+        if (fechaFin.isAfter(fechaInicio)) {
+            throw new ReglaNegocioException("La fecha de fin no puede ser anterior a la de inicio");
+        }
         if (principal && club == null) {
             throw new ReglaNegocioException("Solo un club puede tener sponsor principal");
         }
@@ -75,7 +78,7 @@ public class Patrocinio implements Serializable {
     }
 
     public boolean seSuperponeCon(LocalDate inicio, LocalDate fin) {
-        return !inicio.isAfter(fechaFin) && !fin.isBefore(inicio);
+        return !inicio.isAfter(fechaFin) && !fin.isBefore(fechaInicio);
     }
 
     @Override
