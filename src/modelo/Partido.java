@@ -237,7 +237,8 @@ public class Partido implements Serializable {
         return cambios;
     }
 
-    private int contarAmarillas(Jugador jugador) {
+    // Amarillas vigentes (no anuladas) del jugador en este partido. Torneo la usa para la sanción por acumulación (RN18).
+    public int contarAmarillas(Jugador jugador) {
         int amarillas = 0;
         for (Evento e : eventos) {
             if (e.amonesta(jugador) && !estaAnulado(e)) {
@@ -258,6 +259,11 @@ public class Partido implements Serializable {
     public void finalizar() throws ReglaNegocioException {
         verificarEstado(EstadoPartido.EN_JUEGO, "finalizar el partido");
         this.estado = EstadoPartido.FINALIZADO;
+        for (Evento evento : eventos) { // las estadísticas de goles y tarjetas ignoran los eventos anulados
+            if (!estaAnulado(evento)) {
+                evento.actualizarEstadisticas();
+            }
+        }
         for (Nomina nomina : nominas) {
             for (Jugador jugador : nomina.getJugadores()) {
                 if (nomina.esTitular(jugador) || haEntrado(jugador)) {
