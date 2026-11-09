@@ -17,24 +17,28 @@ public class Torneo implements Serializable {
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private EstadoTorneo estado; // asociacion con ENUM
+    private TipoTorneo tipo; // S02: nacional o internacional
     private int cantidadClasificados; // S02: cuántos clubes clasifican (lo usa la proyección por xG, S08)
     private int puntajeCorte; // S02: corte de años anteriores (lo usa la proyección por promedio, S07)
     private List<Inscripcion> inscripciones; // composicion
-    private List<Partido> partidos; // composicion
+    private Fixture fixture; // composicion: null hasta que se genera (CU04)
 
     // El torneo siempre arranca PLANIFICADO (RN01: es el primer estado)
-    public Torneo(String nombre, LocalDate fechaInicio, LocalDate fechaFin, int cantidadClasificados, int puntajeCorte) throws ReglaNegocioException {
+    public Torneo(String nombre, LocalDate fechaInicio, LocalDate fechaFin, TipoTorneo tipo, int cantidadClasificados, int puntajeCorte) throws ReglaNegocioException {
         if (fechaFin.isBefore(fechaInicio)) {
             throw new ReglaNegocioException("La fecha de fin no puede ser anterior a la fecha de inicio");
+        }
+        if (tipo == null) {
+            throw new ReglaNegocioException("El torneo necesita un tipo (nacional o internacional)");
         }
         this.nombre = nombre;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.estado = EstadoTorneo.PLANIFICADO;
+        this.tipo = tipo;
         this.cantidadClasificados = cantidadClasificados;
         this.puntajeCorte = puntajeCorte;
         this.inscripciones = new ArrayList<>();
-        this.partidos = new ArrayList<>();
     }
 
     public String getNombre() {
@@ -51,6 +55,10 @@ public class Torneo implements Serializable {
 
     public EstadoTorneo getEstado() {
         return estado;
+    }
+
+    public TipoTorneo getTipo() {
+        return tipo;
     }
 
     public int getCantidadClasificados() {
@@ -110,32 +118,24 @@ public class Torneo implements Serializable {
         estado = EstadoTorneo.FINALIZADO;
     }
 
-    public List<Partido> generarFixture() throws ReglaNegocioException {
+    // CU04: Torneo crea el Fixture (Creador). El Fixture arma las fechas todos contra todos (S03).
+    public Fixture generarFixture() throws ReglaNegocioException {
         if (inscripciones.size() < MIN_CLUBES){
             throw new ReglaNegocioException("Para generar el fixture se necesitan al menos " + MIN_CLUBES + " clubes (Por ahora hay " + inscripciones.size() + " clubes)");
         }
-        if (!partidos.isEmpty()){
-            throw new ReglaNegocioException("El fixture de " + nombre + " ya fue genereado");
+        if (fixture != null){
+            throw new ReglaNegocioException("El fixture de " + nombre + " ya fue generado");
         }
-        List<Club> clubes = getClubes();
-        for (int i = 0; i < clubes.size(); i++) {
-            for (int j = i + 1; j < clubes.size(); j++) {
-                if ((i + j) % 2 == 0){
-                    partidos.add(new Partido(clubes.get(i), clubes.get(j)));
-                } else {
-                    partidos.add(new Partido(clubes.get(j), clubes.get(i)));
-                }
-            }
-        }
-        return getPartidos();
+        fixture = new Fixture(getClubes());
+        return fixture;
     }
 
     public static final int HORAS_ENTRE_PARTIDOS_ESTADIO = 3; //RN08
     public static final int HORAS_ENTRE_PARTIDOS_CLUB = 48;
 
     public void programarPartido(Partido partido, LocalDateTime fechaHora, Estadio estadio, TernaArbitral terna) throws ReglaNegocioException {
-        if (!partidos.contains(partido)) {
-            throw new ReglaNegocioException("El partido no pertenece al torneo " + partido);
+        if (!getPartidos().contains(partido)) {
+            throw new ReglaNegocioException("El partido no pertenece al torneo " + nombre);
         }
         // RN04
         LocalDate dia = fechaHora.toLocalDate();
@@ -154,6 +154,7 @@ public class Torneo implements Serializable {
                 throw new ReglaNegocioException(arbitro + " no puede dirigir porque es hincha de uno de los clubes");
             }
         }
+        List<Partido> partidos = getPartidos();
         for (int i = 0; i < partidos.size(); i++) {
             Partido otro = partidos.get(i);
             if (otro == partido || otro.getFechaHora() == null) {
@@ -204,8 +205,16 @@ public class Torneo implements Serializable {
         return new ArrayList<>(inscripciones);
     }
 
+    public Fixture getFixture() {
+        return fixture;
+    }
+
+    // Todos los partidos del fixture (vacío si todavía no se generó)
     public List<Partido> getPartidos() {
-        return new ArrayList<>(partidos);
+        if (fixture == null) {
+            return new ArrayList<>();
+        }
+        return fixture.getPartidos();
     }
 
     @Override
