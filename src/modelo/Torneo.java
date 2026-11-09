@@ -3,7 +3,9 @@ package modelo;
 import excepcion.ReglaNegocioException;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,8 @@ public class Torneo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final int MIN_CLUBES = 4; // RN02
+    public static final int HORAS_ENTRE_PARTIDOS_ESTADIO = 3; // RN08
+    public static final int HORAS_ENTRE_PARTIDOS_CLUB = 48;   // RN09
 
     private String nombre;
     private LocalDate fechaInicio;
@@ -101,6 +105,76 @@ public class Torneo implements Serializable {
         }
         fixture = new Fixture(clubes);
         return fixture;
+    }
+
+    // CU05 + CU14: Torneo es el Experto, conoce todos sus partidos, así que valida la disponibilidad
+    // antes de programar. Solo ve los partidos de este torneo.
+    public void programarPartido(Partido partido, LocalDateTime fechaHora, Estadio estadio, TernaArbitral terna)
+            throws ReglaNegocioException {
+        if (partido == null || fechaHora == null || estadio == null || terna == null) {
+            throw new ReglaNegocioException("Para programar un partido se necesitan partido, fecha y hora, estadio y terna arbitral");
+        }
+        if (!getPartidos().contains(partido)) {
+            throw new ReglaNegocioException("El partido no pertenece al fixture de " + nombre);
+        }
+        if (estado == EstadoTorneo.FINALIZADO) {
+            throw new ReglaNegocioException("No se pueden programar partidos en un torneo FINALIZADO");
+        }
+        validarPeriodo(fechaHora);
+        validarTerna(partido, terna);
+        validarDisponibilidad(partido, fechaHora, estadio, terna);
+        partido.programar(fechaHora, estadio, terna);
+    }
+
+    // RN04: la fecha del partido debe estar dentro del período del torneo.
+    private void validarPeriodo(LocalDateTime fechaHora) throws ReglaNegocioException {
+        LocalDate dia = fechaHora.toLocalDate();
+        if (dia.isBefore(fechaInicio) || dia.isAfter(fechaFin)) {
+            throw new ReglaNegocioException("La fecha " + dia + " está fuera del período del torneo ("
+                    + fechaInicio + " a " + fechaFin + ")");
+        }
+    }
+
+    // Torneos internacionales exigen terna internacional; RN19: ningún árbitro puede ser hincha de los clubes.
+    private void validarTerna(Partido partido, TernaArbitral terna) throws ReglaNegocioException {
+        for (Arbitro arbitro : terna.getArbitros()) {
+            if (tipo == TipoTorneo.INTERNACIONAL && !"internacional".equalsIgnoreCase(arbitro.getCategoria())) {
+                throw new ReglaNegocioException("Un torneo internacional exige una terna internacional: "
+                        + arbitro + " no lo es");
+            }
+            if (arbitro.esHinchaDe(partido.getLocal()) || arbitro.esHinchaDe(partido.getVisitante())) {
+                throw new ReglaNegocioException(arbitro + " es hincha declarado de uno de los clubes");
+            }
+        }
+    }
+
+    // RN08 (estadio, 3 h), RN09 (clubes, 48 h) y RN19 (árbitro, mismo día) contra los demás partidos ya programados.
+    private void validarDisponibilidad(Partido partido, LocalDateTime fechaHora, Estadio estadio, TernaArbitral terna)
+            throws ReglaNegocioException {
+        for (Partido otro : getPartidos()) {
+            boolean estaProgramado = otro != partido && otro.getFechaHora() != null
+                    && otro.getEstado() != EstadoPartido.SUSPENDIDO;
+            if (!estaProgramado) {
+                continue;
+            }
+            Duration diferencia = Duration.between(otro.getFechaHora(), fechaHora).abs();
+            if (otro.getEstadio().equals(estadio) && diferencia.compareTo(Duration.ofHours(HORAS_ENTRE_PARTIDOS_ESTADIO)) < 0) {
+                throw new ReglaNegocioException(estadio + " ya tiene el partido " + otro
+                        + " con menos de " + HORAS_ENTRE_PARTIDOS_ESTADIO + " horas de diferencia");
+            }
+            if ((otro.participa(partido.getLocal()) || otro.participa(partido.getVisitante()))
+                    && diferencia.compareTo(Duration.ofHours(HORAS_ENTRE_PARTIDOS_CLUB)) < 0) {
+                throw new ReglaNegocioException("Un club del partido ya juega " + otro
+                        + " con menos de " + HORAS_ENTRE_PARTIDOS_CLUB + " horas de diferencia");
+            }
+            if (otro.getFechaHora().toLocalDate().equals(fechaHora.toLocalDate())) {
+                for (Arbitro arbitro : terna.getArbitros()) {
+                    if (otro.getTerna().getArbitros().contains(arbitro)) {
+                        throw new ReglaNegocioException(arbitro + " ya dirige otro partido ese día");
+                    }
+                }
+            }
+        }
     }
 
     public boolean estaInscripto(Club club) {
