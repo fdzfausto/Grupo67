@@ -48,6 +48,49 @@ public abstract class Evento implements Serializable {
         return 0;
     }
 
+    // Polimorfismo: igual que golesPara, cada tipo de evento responde a su manera y por defecto no aplica.
+    // Así Partido consulta los eventos sin preguntar de qué clase es cada uno.
+
+    // Anulacion lo sobrescribe: devuelve el evento que anula (null si este evento no es una anulación).
+    public Evento getEventoAnulado() {
+        return null;
+    }
+
+    // Cambio lo sobrescribe: devuelve el jugador que entra (null si este evento no es un cambio).
+    public Jugador getJugadorEntrante() {
+        return null;
+    }
+
+    // Anulacion lo sobrescribe: ¿este evento anula a "otro"?
+    public boolean anula(Evento otro) {
+        return false;
+    }
+
+    // Cambio lo sobrescribe: ¿este evento hace salir al jugador?
+    public boolean sustituye(Jugador jugador) {
+        return false;
+    }
+
+    // Cambio lo sobrescribe: ¿este evento hace entrar al jugador?
+    public boolean haceEntrar(Jugador jugador) {
+        return false;
+    }
+
+    // Tarjeta lo sobrescribe: ¿este evento expulsa al jugador (tarjeta roja)?
+    public boolean expulsa(Jugador jugador) {
+        return false;
+    }
+
+    // Tarjeta lo sobrescribe: ¿este evento es una amarilla para el jugador?
+    public boolean amonesta(Jugador jugador) {
+        return false;
+    }
+
+    // Los jugadores se identifican por DNI, igual que en Nomina e Inscripcion.
+    protected static boolean esElMismo(Jugador a, Jugador b) {
+        return a.getDni().equals(b.getDni());
+    }
+
     @Override
     public String toString() {
         return obtenerDescripcion();

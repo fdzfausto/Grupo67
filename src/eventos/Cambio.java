@@ -25,8 +25,19 @@ public class Cambio extends Evento {
         return getJugador();
     }
 
+    @Override
     public Jugador getJugadorEntrante() {
         return jugadorEntrante;
+    }
+
+    @Override
+    public boolean sustituye(Jugador jugador) {
+        return esElMismo(getJugadorSaliente(), jugador);
+    }
+
+    @Override
+    public boolean haceEntrar(Jugador jugador) {
+        return esElMismo(jugadorEntrante, jugador);
     }
 
     @Override
