@@ -26,6 +26,16 @@ public class Tarjeta extends Evento {
     }
 
     @Override
+    public boolean expulsa(Jugador jugador) {
+        return esRoja() && esElMismo(getJugador(), jugador);
+    }
+
+    @Override
+    public boolean amonesta(Jugador jugador) {
+        return !esRoja() && esElMismo(getJugador(), jugador);
+    }
+
+    @Override
     public String obtenerDescripcion() {
         return "Tarjeta " + tipoTarjeta.name().toLowerCase() + " para " + getJugador().getNombre() + " "
                 + getJugador().getApellido() + " (min " + getMinuto() + ")";

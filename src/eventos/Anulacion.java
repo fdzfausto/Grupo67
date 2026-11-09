@@ -30,8 +30,14 @@ public class Anulacion extends Evento {
         return evento;
     }
 
+    @Override
     public Evento getEventoAnulado() {
         return eventoAnulado;
+    }
+
+    @Override
+    public boolean anula(Evento otro) {
+        return eventoAnulado == otro;
     }
 
     public String getMotivo() {

@@ -1,7 +1,6 @@
 package modelo;
 
 import eventos.Anulacion;
-import eventos.Cambio;
 import eventos.ColorTarjeta;
 import eventos.Evento;
 import eventos.Tarjeta;
@@ -108,15 +107,13 @@ public class Partido implements Serializable {
             throw new ReglaNegocioException("El evento no puede ser nulo");
         }
         verificarEstado(EstadoPartido.EN_JUEGO, "registrar un evento"); // RN12
-        if (evento instanceof Anulacion) {
-            validarAnulacion((Anulacion) evento);
+        if (evento.getEventoAnulado() != null) { // es una anulación
+            validarAnulacion(evento.getEventoAnulado());
         } else {
             validarEventoDeJuego(evento);
         }
         eventos.add(evento);
-        if (evento instanceof Tarjeta) {
-            expulsarPorDobleAmarilla((Tarjeta) evento);
-        }
+        expulsarPorDobleAmarilla(evento);
     }
 
     // RN12: el club juega el partido y el jugador está en su nómina. RN15 y RN16: no actúa quien ya salió.
@@ -129,8 +126,8 @@ public class Partido implements Serializable {
         if (!nomina.contiene(evento.getJugador())) {
             throw new ReglaNegocioException(evento.getJugador() + " no está en la nómina de " + club);
         }
-        if (evento instanceof Cambio) {
-            validarCambio((Cambio) evento, nomina);
+        if (evento.getJugadorEntrante() != null) { // es un cambio
+            validarCambio(evento, nomina);
         } else {
             validarJugadorEnJuego(evento.getJugador());
         }
@@ -147,8 +144,8 @@ public class Partido implements Serializable {
 
     // RN15 y RN16: sale alguien que está en cancha y no está expulsado, entra un suplente que no jugó,
     // y el club no pasa de 5 cambios.
-    private void validarCambio(Cambio cambio, Nomina nomina) throws ReglaNegocioException {
-        Jugador sale = cambio.getJugadorSaliente();
+    private void validarCambio(Evento cambio, Nomina nomina) throws ReglaNegocioException {
+        Jugador sale = cambio.getJugador();
         Jugador entra = cambio.getJugadorEntrante();
         if (!nomina.contiene(entra)) {
             throw new ReglaNegocioException(entra + " no está en la nómina de " + cambio.getEquipo());
@@ -174,27 +171,27 @@ public class Partido implements Serializable {
     }
 
     // RN17 y CU08: se anula un evento de este partido que no haya sido anulado antes.
-    private void validarAnulacion(Anulacion anulacion) throws ReglaNegocioException {
-        if (!eventos.contains(anulacion.getEventoAnulado())) {
+    private void validarAnulacion(Evento anulado) throws ReglaNegocioException {
+        if (!eventos.contains(anulado)) {
             throw new ReglaNegocioException("El evento a anular no pertenece a este partido");
         }
-        if (estaAnulado(anulacion.getEventoAnulado())) {
+        if (estaAnulado(anulado)) {
             throw new ReglaNegocioException("El evento ya fue anulado");
         }
     }
 
     // RN15 y S05: la segunda amarilla de un jugador equivale a una roja, que el partido registra en el mismo minuto.
-    private void expulsarPorDobleAmarilla(Tarjeta tarjeta) throws ReglaNegocioException {
-        if (tarjeta.esRoja() || contarAmarillas(tarjeta.getJugador()) < 2) {
-            return;
+    private void expulsarPorDobleAmarilla(Evento evento) throws ReglaNegocioException {
+        Jugador jugador = evento.getJugador();
+        if (evento.amonesta(jugador) && contarAmarillas(jugador) == 2) {
+            eventos.add(new Tarjeta(evento.getMinuto(), jugador, evento.getEquipo(), ColorTarjeta.ROJA));
         }
-        eventos.add(new Tarjeta(tarjeta.getMinuto(), tarjeta.getJugador(), tarjeta.getEquipo(), ColorTarjeta.ROJA));
     }
 
-    // Un evento está anulado si hay una Anulacion que lo referencia (RN17).
+    // Un evento está anulado si hay una anulación que lo referencia (RN17).
     public boolean estaAnulado(Evento evento) {
         for (Evento e : eventos) {
-            if (e instanceof Anulacion && ((Anulacion) e).getEventoAnulado() == evento) {
+            if (e.anula(evento)) {
                 return true;
             }
         }
@@ -204,7 +201,7 @@ public class Partido implements Serializable {
     // Experto: Partido tiene los eventos, así que sabe quién fue expulsado (roja vigente, directa o por doble amarilla).
     public boolean estaExpulsado(Jugador jugador) {
         for (Evento e : eventos) {
-            if (e instanceof Tarjeta && ((Tarjeta) e).esRoja() && !estaAnulado(e) && mismoJugador(e.getJugador(), jugador)) {
+            if (e.expulsa(jugador) && !estaAnulado(e)) {
                 return true;
             }
         }
@@ -213,7 +210,7 @@ public class Partido implements Serializable {
 
     private boolean fueSustituido(Jugador jugador) {
         for (Evento e : eventos) {
-            if (e instanceof Cambio && !estaAnulado(e) && mismoJugador(((Cambio) e).getJugadorSaliente(), jugador)) {
+            if (e.sustituye(jugador) && !estaAnulado(e)) {
                 return true;
             }
         }
@@ -222,7 +219,7 @@ public class Partido implements Serializable {
 
     private boolean haEntrado(Jugador jugador) {
         for (Evento e : eventos) {
-            if (e instanceof Cambio && !estaAnulado(e) && mismoJugador(((Cambio) e).getJugadorEntrante(), jugador)) {
+            if (e.haceEntrar(jugador) && !estaAnulado(e)) {
                 return true;
             }
         }
@@ -232,7 +229,8 @@ public class Partido implements Serializable {
     private int contarCambios(Club club) {
         int cambios = 0;
         for (Evento e : eventos) {
-            if (e instanceof Cambio && !estaAnulado(e) && e.getEquipo().equals(club)) {
+            boolean esCambio = e.getJugadorEntrante() != null;
+            if (esCambio && e.getEquipo().equals(club) && !estaAnulado(e)) {
                 cambios++;
             }
         }
@@ -242,35 +240,21 @@ public class Partido implements Serializable {
     private int contarAmarillas(Jugador jugador) {
         int amarillas = 0;
         for (Evento e : eventos) {
-            if (e instanceof Tarjeta && !((Tarjeta) e).esRoja() && !estaAnulado(e) && mismoJugador(e.getJugador(), jugador)) {
+            if (e.amonesta(jugador) && !estaAnulado(e)) {
                 amarillas++;
             }
         }
         return amarillas;
     }
 
-    // Los jugadores se identifican por DNI, igual que en Nomina e Inscripcion.
-    private boolean mismoJugador(Jugador a, Jugador b) {
-        return a.getDni().equals(b.getDni());
+    // CU08: crea la anulación del evento. Que el evento sea de este partido y no esté ya anulado
+    // lo valida registrarEvento (RN17), así la regla vive en un solo lugar.
+    public void anularEvento(Evento evento, String motivo) throws ReglaNegocioException {
+        registrarEvento(new Anulacion(evento, motivo));
     }
 
     // CU07: al cerrar, el partido suma un partido jugado a titulares y a suplentes que entraron.
     // El marcador no se guarda: se calcula desde los eventos (getGoles).
-    public void anularEvento(Evento evento, String motivo) throws ReglaNegocioException {
-        if (!eventos.contains(evento)) {
-            throw new ReglaNegocioException("El evento no pertenece a este partido");
-        }
-        for (int i = 0; i < eventos.size(); i++) {
-            if (eventos.get(i) instanceof Anulacion) {
-                Anulacion anulacion = (Anulacion) eventos.get(i);
-                if (anulacion.getEventoAnulado() == evento) {
-                    throw new ReglaNegocioException("Ese evento ya fue anulado");
-                }
-            }
-        }
-        registrarEvento(new Anulacion(evento, motivo));
-    }
-
     public void finalizar() throws ReglaNegocioException {
         verificarEstado(EstadoPartido.EN_JUEGO, "finalizar el partido");
         this.estado = EstadoPartido.FINALIZADO;
