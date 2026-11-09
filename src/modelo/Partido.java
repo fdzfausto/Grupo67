@@ -208,6 +208,16 @@ public class Partido implements Serializable {
         return false;
     }
 
+    // RN18 y S05: si el jugador fue expulsado por doble amarilla, esas amarillas no suman para el límite de 5
+    // del torneo (ya recibió la fecha de suspensión por la roja). Una amarilla suelta sí suma.
+    public int amarillasParaAcumulacion(Jugador jugador) {
+        int amarillas = contarAmarillas(jugador);
+        if (amarillas >= 2) {
+            return 0;
+        }
+        return amarillas;
+    }
+
     private boolean fueSustituido(Jugador jugador) {
         for (Evento e : eventos) {
             if (e.sustituye(jugador) && !estaAnulado(e)) {

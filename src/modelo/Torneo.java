@@ -241,10 +241,10 @@ public class Torneo implements Serializable {
         int antes = 0;
         for (Partido otro : getPartidos()) {
             if (otro != partido && otro.getEstado() == EstadoPartido.FINALIZADO) {
-                antes += otro.contarAmarillas(jugador);
+                antes += otro.amarillasParaAcumulacion(jugador);
             }
         }
-        int despues = antes + partido.contarAmarillas(jugador);
+        int despues = antes + partido.amarillasParaAcumulacion(jugador);
         if (despues / AMARILLAS_PARA_SUSPENSION > antes / AMARILLAS_PARA_SUSPENSION) {
             sanciones.add(new Sancion(jugador, club, partido, Sancion.MOTIVO_AMARILLAS));
         }
