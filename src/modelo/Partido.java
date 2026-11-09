@@ -1,5 +1,6 @@
 package modelo;
 
+import eventos.Anulacion;
 import eventos.ColorTarjeta;
 import eventos.Evento;
 import eventos.Tarjeta;
@@ -246,23 +247,14 @@ public class Partido implements Serializable {
         return amarillas;
     }
 
-    // CU07: al cerrar, el partido suma un partido jugado a titulares y a suplentes que entraron.
-    // El marcador no se guarda: se calcula desde los eventos (getGoles).
+    // CU08: crea la anulación del evento. Que el evento sea de este partido y no esté ya anulado
+    // lo valida registrarEvento (RN17), así la regla vive en un solo lugar.
     public void anularEvento(Evento evento, String motivo) throws ReglaNegocioException {
-        if (!eventos.contains(evento)) {
-            throw new ReglaNegocioException("El evento no pertenece a este partido");
-        }
-        for (int i = 0; i < eventos.size(); i++) {
-            if (eventos.get(i) instanceof Anulacion) {
-                Anulacion anulacion = (Anulacion) eventos.get(i);
-                if (anulacion.getEventoAnulado() == evento) {
-                    throw new ReglaNegocioException("Ese evento ya fue anulado");
-                }
-            }
-        }
         registrarEvento(new Anulacion(evento, motivo));
     }
 
+    // CU07: al cerrar, el partido suma un partido jugado a titulares y a suplentes que entraron.
+    // El marcador no se guarda: se calcula desde los eventos (getGoles).
     public void finalizar() throws ReglaNegocioException {
         verificarEstado(EstadoPartido.EN_JUEGO, "finalizar el partido");
         this.estado = EstadoPartido.FINALIZADO;
