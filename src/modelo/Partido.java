@@ -1,5 +1,6 @@
 package modelo;
 
+import eventos.Anulacion;
 import eventos.Evento;
 import excepcion.ReglaNegocioException;
 
@@ -99,6 +100,21 @@ public class Partido implements Serializable {
         eventos.add(evento);
     }
 
+    public void anularEvento(Evento evento, String motivo) throws ReglaNegocioException {
+        if (!eventos.contains(evento)) {
+            throw new ReglaNegocioException("El evento no pertenece a este partido");
+        }
+        for (int i = 0; i < eventos.size(); i++) {
+            if (eventos.get(i) instanceof Anulacion) {
+                Anulacion anulacion = (Anulacion) eventos.get(i);
+                if (anulacion.getEventoAnulado() == evento) {
+                    throw new ReglaNegocioException("Ese evento ya fue anulado");
+                }
+            }
+        }
+        registrarEvento(new Anulacion(evento, motivo));
+    }
+
     public void finalizar() throws ReglaNegocioException {
         verificarEstado(EstadoPartido.EN_JUEGO, "finalizar el partido");
         this.estado = EstadoPartido.FINALIZADO;
@@ -111,7 +127,6 @@ public class Partido implements Serializable {
         this.estado = EstadoPartido.SUSPENDIDO;
     }
 
-    // Experto: el marcador se calcula desde los eventos, no se guarda aparte.
     public int getGoles(Club club) {
         int goles = 0;
         for (Evento evento : eventos) {
