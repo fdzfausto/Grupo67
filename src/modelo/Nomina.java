@@ -57,6 +57,16 @@ public class Nomina implements Serializable {
         return false;
     }
 
+    // Experto: la nómina sabe quiénes son sus titulares (se compara por DNI, igual que contiene).
+    public boolean esTitular(Jugador jugador) {
+        for (Jugador j : titulares) {
+            if (j.getDni().equals(jugador.getDni())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Titulares y suplentes juntos.
     public List<Jugador> getJugadores() {
         List<Jugador> todos = new ArrayList<>(titulares);
