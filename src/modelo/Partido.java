@@ -19,6 +19,7 @@ public class Partido implements Serializable {
     private TernaArbitral terna;
     private EstadoPartido estado;
     private List<Evento> eventos; // composición: los eventos pertenecen al partido
+    private List<Nomina> nominas; // composición: una nómina por club (0..2)
 
     // El fixture crea los partidos sin fecha, estadio ni terna (supuesto S03).
     public Partido(Club local, Club visitante) throws ReglaNegocioException {
@@ -32,6 +33,7 @@ public class Partido implements Serializable {
         this.visitante = visitante;
         this.estado = EstadoPartido.SIN_PROGRAMAR;
         this.eventos = new ArrayList<>();
+        this.nominas = new ArrayList<>();
     }
 
     // Las validaciones que dependen del torneo (RN04, CU14) las hace Torneo antes de llamar a este método.
@@ -44,6 +46,45 @@ public class Partido implements Serializable {
         this.estadio = estadio;
         this.terna = terna;
         this.estado = EstadoPartido.PROGRAMADO;
+    }
+
+    // CU06: la nómina se carga con el partido PROGRAMADO y con jugadores del plantel inscripto (S04).
+    // Si el club ya había cargado una nómina, se reemplaza (permite corregirla antes de iniciar).
+    public void cargarNomina(Nomina nomina, Inscripcion inscripcion) throws ReglaNegocioException {
+        verificarEstado(EstadoPartido.PROGRAMADO, "cargar la nómina");
+        if (nomina == null || inscripcion == null) {
+            throw new ReglaNegocioException("Se necesitan la nómina y la inscripción del club");
+        }
+        Club club = nomina.getClub();
+        if (!participa(club)) {
+            throw new ReglaNegocioException(club + " no juega este partido");
+        }
+        if (!inscripcion.getClub().equals(club)) {
+            throw new ReglaNegocioException("La inscripción no corresponde a " + club);
+        }
+        if (!nomina.validarNomina()) {
+            throw new ReglaNegocioException("La nómina debe tener " + Nomina.CANTIDAD_TITULARES
+                    + " titulares y hasta " + Nomina.MAX_SUPLENTES + " suplentes");
+        }
+        for (Jugador jugador : nomina.getJugadores()) {
+            if (!inscripcion.contiene(jugador)) {
+                throw new ReglaNegocioException(jugador + " no está en el plantel inscripto de " + club);
+            }
+        }
+        Nomina anterior = getNomina(club);
+        if (anterior != null) {
+            nominas.remove(anterior);
+        }
+        nominas.add(nomina);
+    }
+
+    public Nomina getNomina(Club club) {
+        for (Nomina nomina : nominas) {
+            if (nomina.getClub().equals(club)) {
+                return nomina;
+            }
+        }
+        return null;
     }
 
     public void iniciar() throws ReglaNegocioException {
