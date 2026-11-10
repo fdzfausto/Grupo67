@@ -290,6 +290,29 @@ public class Partido implements Serializable {
         this.estado = EstadoPartido.SUSPENDIDO;
     }
 
+    public double calcularXGJugador(Jugador jugador) {
+        double total = 0;
+        for (int i = 0; i < eventos.size(); i++) {
+            Evento e = eventos.get(i);
+            if (!estaAnulado(e) && e.getJugador().getDni().equals(jugador.getDni())) {
+                total = total + e.calcularXG();
+            }
+        }
+        return total;
+    }
+
+    // RN27 y CU13: xG de un club en este partido = suma del xG de los remates de sus jugadores.
+    public double calcularXGClub(Club club) {
+        double total = 0;
+        for (int i = 0; i < eventos.size(); i++) {
+            Evento e = eventos.get(i);
+            if (!estaAnulado(e) && e.getEquipo() == club) {
+                total = total + e.calcularXG();
+            }
+        }
+        return total;
+    }
+
     public int getGoles(Club club) {
         int goles = 0;
         for (Evento evento : eventos) {

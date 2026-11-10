@@ -48,6 +48,10 @@ public abstract class Evento implements Serializable {
         return 0;
     }
 
+    public double calcularXG(){
+        return 0;
+    }
+
     // Polimorfismo: igual que golesPara, cada tipo de evento responde a su manera y por defecto no aplica.
     // Así Partido consulta los eventos sin preguntar de qué clase es cada uno.
 
