@@ -22,7 +22,8 @@ public class Remate extends Evento {
     }
 
     // RN27: el xG del remate depende de la zona.
-    public double getXG() {
+    @Override
+    public double calcularXG() {
         return zonaRemate.getValorXG();
     }
 
