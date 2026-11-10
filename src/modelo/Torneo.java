@@ -1,5 +1,6 @@
 package modelo;
 
+import eventos.Evento;
 import excepcion.ReglaNegocioException;
 
 import java.io.Serializable;
@@ -15,6 +16,7 @@ public class Torneo implements Serializable {
     public static final int MIN_CLUBES = 4; // RN02
     public static final int HORAS_ENTRE_PARTIDOS_ESTADIO = 3; // RN08
     public static final int HORAS_ENTRE_PARTIDOS_CLUB = 48;   // RN09
+    public static final int AMARILLAS_PARA_SUSPENSION = 5;    // RN18
 
     private String nombre;
     private LocalDate fechaInicio;
@@ -25,6 +27,8 @@ public class Torneo implements Serializable {
     private int puntajeCorte;            // S02: corte de años anteriores
     private List<Inscripcion> inscripciones; // composición: no existen sin el torneo
     private Fixture fixture;             // null hasta que se genera
+    private List<Sancion> sanciones;     // RN18: las crea Torneo, que conoce los partidos
+    private List<Partido> partidosConSanciones; // partidos cuyas sanciones ya se registraron
 
     public Torneo(String nombre, LocalDate fechaInicio, LocalDate fechaFin, TipoTorneo tipo,
                   int cuposClasificacion, int puntajeCorte) throws ReglaNegocioException {
@@ -48,6 +52,8 @@ public class Torneo implements Serializable {
         this.puntajeCorte = puntajeCorte;
         this.estado = EstadoTorneo.PLANIFICADO;
         this.inscripciones = new ArrayList<>();
+        this.sanciones = new ArrayList<>();
+        this.partidosConSanciones = new ArrayList<>();
     }
 
     // Creador: Torneo crea sus inscripciones y verifica las reglas antes (CU03).
@@ -175,6 +181,96 @@ public class Torneo implements Serializable {
                 }
             }
         }
+    }
+
+    // CU06 + RN18: Torneo conoce las inscripciones y las sanciones, así que valida que no haya suspendidos
+    // y recién después delega en Partido. Se asume que la nómina se carga cuando el partido es el siguiente del club.
+    public void cargarNomina(Partido partido, Nomina nomina) throws ReglaNegocioException {
+        if (partido == null || nomina == null) {
+            throw new ReglaNegocioException("Se necesitan el partido y la nómina");
+        }
+        if (!getPartidos().contains(partido)) {
+            throw new ReglaNegocioException("El partido no pertenece al fixture de " + nombre);
+        }
+        Inscripcion inscripcion = buscarInscripcion(nomina.getClub());
+        if (inscripcion == null) {
+            throw new ReglaNegocioException(nomina.getClub() + " no está inscripto en " + nombre);
+        }
+        for (Jugador jugador : nomina.getJugadores()) {
+            if (estaSuspendido(jugador)) {
+                throw new ReglaNegocioException(jugador + " está suspendido y no puede incluirse en la nómina");
+            }
+        }
+        partido.cargarNomina(nomina, inscripcion);
+    }
+
+    // RN18 y S05: se llama una vez por partido, después de finalizarlo. Primero se cumplen las suspensiones
+    // pendientes de los clubes que acaban de jugar (se asume que los partidos se cierran en orden) y después
+    // se crean las nuevas: una por cada roja y una por cada 5 amarillas acumuladas en el torneo.
+    public void registrarSanciones(Partido partido) throws ReglaNegocioException {
+        if (partido == null || !getPartidos().contains(partido)) {
+            throw new ReglaNegocioException("El partido no pertenece al fixture de " + nombre);
+        }
+        if (partido.getEstado() != EstadoPartido.FINALIZADO) {
+            throw new ReglaNegocioException("Las sanciones se registran con el partido FINALIZADO");
+        }
+        if (partidosConSanciones.contains(partido)) {
+            throw new ReglaNegocioException("Las sanciones de este partido ya fueron registradas");
+        }
+        for (Sancion sancion : sanciones) {
+            if (sancion.estaPendiente() && partido.participa(sancion.getClub())) {
+                sancion.cumplir();
+            }
+        }
+        List<String> amonestados = new ArrayList<>(); // DNIs ya revisados, para no sancionar dos veces
+        for (Evento evento : partido.getEventos()) {
+            Jugador jugador = evento.getJugador();
+            if (evento.expulsa(jugador) && !partido.estaAnulado(evento)) {
+                sanciones.add(new Sancion(jugador, evento.getEquipo(), partido, Sancion.MOTIVO_ROJA));
+            }
+            if (evento.amonesta(jugador) && !amonestados.contains(jugador.getDni())) {
+                amonestados.add(jugador.getDni());
+                sancionarPorAmarillas(partido, jugador, evento.getEquipo());
+            }
+        }
+        partidosConSanciones.add(partido);
+    }
+
+    // Cada vez que el total de amarillas del torneo cruza un múltiplo de 5 hay una fecha de suspensión.
+    private void sancionarPorAmarillas(Partido partido, Jugador jugador, Club club) {
+        int antes = 0;
+        for (Partido otro : getPartidos()) {
+            if (otro != partido && otro.getEstado() == EstadoPartido.FINALIZADO) {
+                antes += otro.amarillasParaAcumulacion(jugador);
+            }
+        }
+        int despues = antes + partido.amarillasParaAcumulacion(jugador);
+        if (despues / AMARILLAS_PARA_SUSPENSION > antes / AMARILLAS_PARA_SUSPENSION) {
+            sanciones.add(new Sancion(jugador, club, partido, Sancion.MOTIVO_AMARILLAS));
+        }
+    }
+
+    // Experto: el torneo tiene las sanciones, así que sabe si un jugador está suspendido.
+    public boolean estaSuspendido(Jugador jugador) {
+        for (Sancion sancion : sanciones) {
+            if (sancion.estaPendiente() && sancion.getJugador().getDni().equals(jugador.getDni())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<Sancion> getSanciones() {
+        return new ArrayList<>(sanciones);
+    }
+
+    private Inscripcion buscarInscripcion(Club club) {
+        for (Inscripcion inscripcion : inscripciones) {
+            if (inscripcion.getClub().equals(club)) {
+                return inscripcion;
+            }
+        }
+        return null;
     }
 
     public boolean estaInscripto(Club club) {

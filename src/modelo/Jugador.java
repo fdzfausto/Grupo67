@@ -12,6 +12,8 @@ public class Jugador extends Persona {
     private int numeroCamiseta;
     private double valorMercado;
     private int partidosJugados;
+    private int goles;    // estadísticas acumuladas (RN07: se conservan aunque rescinda el contrato)
+    private int tarjetas;
     private List<Contrato> contratos = new ArrayList<>();
 
     public Jugador (String dni, String nombre, String apellido, LocalDate fechaNacimiento, String posicion, int numeroCamiseta, double valorMercado, int partidosJugados) {
@@ -48,6 +50,22 @@ public class Jugador extends Persona {
 
     public void sumarPartidoJugado(){
         this.partidosJugados++;
+    }
+
+    public int getGoles() {
+        return goles;
+    }
+
+    public void sumarGol() {
+        this.goles++;
+    }
+
+    public int getTarjetas() {
+        return tarjetas;
+    }
+
+    public void sumarTarjeta() {
+        this.tarjetas++;
     }
 
     public String toString() {

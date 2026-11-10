@@ -26,6 +26,11 @@ public class Tarjeta extends Evento {
     }
 
     @Override
+    public void actualizarEstadisticas() {
+        getJugador().sumarTarjeta();
+    }
+
+    @Override
     public boolean expulsa(Jugador jugador) {
         return esRoja() && esElMismo(getJugador(), jugador);
     }

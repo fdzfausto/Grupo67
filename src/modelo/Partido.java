@@ -208,6 +208,16 @@ public class Partido implements Serializable {
         return false;
     }
 
+    // RN18 y S05: si el jugador fue expulsado por doble amarilla, esas amarillas no suman para el límite de 5
+    // del torneo (ya recibió la fecha de suspensión por la roja). Una amarilla suelta sí suma.
+    public int amarillasParaAcumulacion(Jugador jugador) {
+        int amarillas = contarAmarillas(jugador);
+        if (amarillas >= 2) {
+            return 0;
+        }
+        return amarillas;
+    }
+
     private boolean fueSustituido(Jugador jugador) {
         for (Evento e : eventos) {
             if (e.sustituye(jugador) && !estaAnulado(e)) {
@@ -237,7 +247,8 @@ public class Partido implements Serializable {
         return cambios;
     }
 
-    private int contarAmarillas(Jugador jugador) {
+    // Amarillas vigentes (no anuladas) del jugador en este partido. Torneo la usa para la sanción por acumulación (RN18).
+    public int contarAmarillas(Jugador jugador) {
         int amarillas = 0;
         for (Evento e : eventos) {
             if (e.amonesta(jugador) && !estaAnulado(e)) {
@@ -258,6 +269,11 @@ public class Partido implements Serializable {
     public void finalizar() throws ReglaNegocioException {
         verificarEstado(EstadoPartido.EN_JUEGO, "finalizar el partido");
         this.estado = EstadoPartido.FINALIZADO;
+        for (Evento evento : eventos) { // las estadísticas de goles y tarjetas ignoran los eventos anulados
+            if (!estaAnulado(evento)) {
+                evento.actualizarEstadisticas();
+            }
+        }
         for (Nomina nomina : nominas) {
             for (Jugador jugador : nomina.getJugadores()) {
                 if (nomina.esTitular(jugador) || haEntrado(jugador)) {

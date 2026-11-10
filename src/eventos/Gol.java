@@ -39,6 +39,14 @@ public class Gol extends Evento {
         }
     }
 
+    // RN26: el gol de penal cuenta para el goleador; el gol en contra no.
+    @Override
+    public void actualizarEstadisticas() {
+        if (tipoGol != TipoGol.EN_CONTRA) {
+            getJugador().sumarGol();
+        }
+    }
+
     @Override
     public String obtenerDescripcion() {
         String tipo;

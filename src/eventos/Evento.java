@@ -56,6 +56,11 @@ public abstract class Evento implements Serializable {
         return null;
     }
 
+    // Gol y Tarjeta lo sobrescriben: suman a las estadísticas del jugador. Partido lo llama al finalizar
+    // (actualizarEstadisticas del diagrama CU07); por defecto un evento no suma nada.
+    public void actualizarEstadisticas() {
+    }
+
     // Cambio lo sobrescribe: devuelve el jugador que entra (null si este evento no es un cambio).
     public Jugador getJugadorEntrante() {
         return null;
