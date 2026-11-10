@@ -31,7 +31,7 @@ public class ProyeccionPorPromedio implements MetodoProyeccion{
         if (puntosProyectados >= torneo.getPuntajeCorte()){
             return 100;
         }
-        return puntosProyectados / torneo.getPuntajeCorte();
+        return puntosProyectados / torneo.getPuntajeCorte() * 100;
     }
 
     private Club rival (Partido p, Club club){
