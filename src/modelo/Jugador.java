@@ -69,7 +69,7 @@ public class Jugador extends Persona {
     }
 
     public String toString() {
-        return super.toString() + " (Numero de camiseta: " + numeroCamiseta + " - " + posicion + " - " + ")";
+        return super.toString() + " (Numero de camiseta: " + numeroCamiseta + " - " + posicion + ")";
     }
 
     // Contratos de los jugadores
