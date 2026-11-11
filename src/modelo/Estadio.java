@@ -10,12 +10,20 @@ public class Estadio implements Serializable {
     private String clima;
     private String terreno;
 
-    public Estadio(String nombre, int capacidad, String direccion, String clima) {
+    public Estadio(String nombre, int capacidad, String direccion, String clima, String terreno) {
         this.nombre = nombre;
         this.capacidad = capacidad;
         this.direccion = direccion;
         this.clima = clima;
         this.terreno = terreno;
+    }
+
+    public Estadio(String nombre, int capacidad, String direccion, String clima) {
+        this.nombre = nombre;
+        this.capacidad = capacidad;
+        this.direccion = direccion;
+        this.clima = clima;
+        this.terreno = "No informado";
     }
 
     public String getNombre() {
@@ -40,6 +48,6 @@ public class Estadio implements Serializable {
 
     @Override
     public String toString() {
-        return nombre + "( " + capacidad + " personas)" ;
+        return nombre + " (" + capacidad + " personas)" ;
     }
 }
