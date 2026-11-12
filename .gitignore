@@ -5,3 +5,6 @@ out/
 
 # Java compilado
 *.class
+
+# Archivos de persistencia generados al ejecutar
+*.dat

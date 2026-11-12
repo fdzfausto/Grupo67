@@ -1,5 +1,10 @@
 package consola;
 
+
+
+import controlador.ControladorPartido;
+import controlador.ControladorReportes;
+import controlador.ControladorTorneo;
 import eventos.Cambio;
 import eventos.ColorTarjeta;
 import eventos.Evento;
@@ -9,7 +14,14 @@ import eventos.Remate;
 import eventos.Tarjeta;
 import eventos.TipoGol;
 import eventos.ZonaRemate;
+import excepcion.PersistenciaException;
 import excepcion.ReglaNegocioException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import modelo.Arbitro;
 import modelo.Club;
 import modelo.Contrato;
@@ -26,22 +38,13 @@ import modelo.Torneo;
 import notificaciones.AppMovil;
 import notificaciones.CanalNotificacion;
 import notificaciones.CorreoPrensa;
-import notificaciones.Notificacion;
-import notificaciones.ServicioNotificaciones;
 import notificaciones.Sms;
 import notificaciones.Suscriptor;
+import persistencia.RepositorioArchivo;
 import reportes.Goleador;
 import reportes.MetodoProyeccion;
 import reportes.ProyeccionPorPromedio;
 import reportes.ProyeccionPorXG;
-import reportes.ServicioReportes;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 // Menú principal por consola. Solo coordina: pide los datos al usuario y delega las reglas en el modelo.
 public class Menu {
@@ -53,23 +56,57 @@ public class Menu {
 
     private Consola consola;
     private Datos datos;
-    private ServicioNotificaciones servicioNotificaciones;
-    private ServicioReportes servicioReportes;
+
+    private RepositorioArchivo repositorio;
+    private ControladorTorneo controladorTorneo;
+    private ControladorPartido controladorPartido;
+    private ControladorReportes controladorReportes;
+
+    private static final String ARCHIVO_DATOS = "futbolstats.dat";
 
     public Menu() {
         this.consola = new Consola();
         this.datos = new Datos();
-        this.servicioNotificaciones = new ServicioNotificaciones();
-        this.servicioReportes = new ServicioReportes();
+
+        this.repositorio = new RepositorioArchivo();
+        this.controladorTorneo = new ControladorTorneo();
+        this.controladorPartido = new ControladorPartido();
+        this.controladorReportes = new ControladorReportes();
     }
 
     public void iniciar() {
+        cargarDatos();
+
         try {
             menuPrincipal();
         } catch (IllegalStateException e) {
             consola.mostrar(e.getMessage());
         } finally {
             consola.cerrar();
+        }
+    }
+
+    private void cargarDatos() {
+        try {
+            if (repositorio.existe(ARCHIVO_DATOS)) {
+                datos = repositorio.cargar(ARCHIVO_DATOS, Datos.class);
+                consola.mostrar("Datos recuperados correctamente.");
+            } else {
+                consola.mostrar("No existe un archivo previo. Se inicia con datos vacíos.");
+            }
+        } catch (PersistenciaException e) {
+            consola.mostrar("No se pudieron cargar los datos: " + e.getMessage());
+            consola.mostrar("Se iniciará con datos vacíos.");
+            datos = new Datos();
+        }
+    }
+
+    private void guardarDatos() {
+        try {
+            repositorio.guardar(datos, ARCHIVO_DATOS);
+            consola.mostrar("Datos guardados correctamente.");
+        } catch (PersistenciaException e) {
+            consola.mostrar("No se pudieron guardar los datos: " + e.getMessage());
         }
     }
 
@@ -114,6 +151,7 @@ public class Menu {
             }
         }
         consola.mostrar("Hasta luego.");
+        guardarDatos();
     }
 
     // ---------- CU01: administrar datos ----------
@@ -411,7 +449,7 @@ public class Menu {
         }
         List<Jugador> plantel = datos.jugadoresDe(club);
         consola.mostrar("Se inscribe el plantel con contrato vigente: " + plantel.size() + " jugadores.");
-        torneo.inscribirClub(club, plantel);
+        controladorTorneo.inscribirClub(torneo, club, plantel);
         consola.mostrar(club + " inscripto en " + torneo.getNombre());
     }
 
@@ -420,7 +458,7 @@ public class Menu {
         if (torneo == null) {
             return;
         }
-        torneo.generarFixture();
+        controladorTorneo.generarFixture(torneo);
         consola.mostrar("Fixture generado: " + torneo.getPartidos().size() + " partidos.");
     }
 
@@ -448,7 +486,7 @@ public class Menu {
         if (torneo == null) {
             return;
         }
-        torneo.avanzarEstado();
+        controladorTorneo.avanzarEstado(torneo);
         consola.mostrar("El torneo ahora está " + torneo.getEstado());
     }
 
@@ -479,7 +517,7 @@ public class Menu {
                 case 1 -> ejecutar(() -> programarPartido(torneo, partido));
                 case 2 -> ejecutar(() -> cargarNomina(torneo, partido));
                 case 3 -> ejecutar(() -> {
-                    partido.iniciar();
+                    controladorPartido.iniciarPartido(partido);
                     consola.mostrar("El partido está EN_JUEGO.");
                 });
                 case 4 -> ejecutar(() -> registrarEvento(partido));
@@ -487,7 +525,7 @@ public class Menu {
                 case 6 -> verEventos(partido);
                 case 7 -> ejecutar(() -> finalizarPartido(torneo, partido));
                 case 8 -> ejecutar(() -> {
-                    partido.suspender();
+                    controladorPartido.suspenderPartido(partido);
                     consola.mostrar("El partido quedó SUSPENDIDO.");
                 });
                 case 0 -> volver = true;
@@ -519,7 +557,7 @@ public class Menu {
             return;
         }
         TernaArbitral terna = new TernaArbitral(principal, asistente1, asistente2);
-        torneo.programarPartido(partido, fechaHora, estadio, terna); // valida la disponibilidad (CU14)
+        controladorTorneo.programarPartido(torneo, partido, fechaHora, estadio, terna); // valida la disponibilidad (CU14)
         consola.mostrar("Partido programado el " + fechaHora + " en " + estadio + ".");
     }
 
@@ -549,7 +587,7 @@ public class Menu {
                 nomina.agregarSuplente(jugador);
             }
         }
-        torneo.cargarNomina(partido, nomina); // valida suspensiones y plantel inscripto (CU06)
+        	controladorTorneo.cargarNomina(torneo, partido, nomina); // valida suspensiones y plantel inscripto (CU06)
         consola.mostrar("Nómina cargada: " + nomina);
     }
 
@@ -577,15 +615,15 @@ public class Menu {
         if (evento == null) {
             return;
         }
-        int cantidadAntes = partido.getEventos().size();
-        partido.registrarEvento(evento);
+        List<Evento> eventosNuevos = controladorPartido.registrarEvento(
+                partido, evento, datos.getSuscriptores());
+
         consola.mostrar("Evento registrado: min " + minuto + " - " + evento);
-        List<Evento> todos = partido.getEventos();
-        for (int i = cantidadAntes; i < todos.size(); i++) { // incluye la roja automática por doble amarilla
-            if (todos.get(i) != evento) {
-                consola.mostrar("El partido registró además: " + todos.get(i));
+
+        for (Evento eventoNuevo : eventosNuevos) {
+            if (eventoNuevo != evento) {
+                consola.mostrar("El partido registró además: " + eventoNuevo);
             }
-            notificarSiCorresponde(partido, todos.get(i));
         }
     }
 
@@ -623,27 +661,6 @@ public class Menu {
         }
     }
 
-    // CU09: se avisa cuando hay un gol o una tarjeta roja. El evento sabe si es un gol o una expulsión.
-    private void notificarSiCorresponde(Partido partido, Evento evento) throws ReglaNegocioException {
-        int goles = evento.golesPara(partido.getLocal()) + evento.golesPara(partido.getVisitante());
-        if (goles > 0) {
-            notificar(partido, evento.getMinuto(), "Gol: " + evento);
-        } else if (evento.expulsa(evento.getJugador())) {
-            notificar(partido, evento.getMinuto(), "Tarjeta roja: " + evento);
-        }
-    }
-
-    // Avisa a los suscriptores que siguen a alguno de los dos clubes. Un canal que falla no frena la carga.
-    private void notificar(Partido partido, int minuto, String hecho) throws ReglaNegocioException {
-        List<Suscriptor> destinatarios = new ArrayList<>();
-        for (Suscriptor suscriptor : datos.getSuscriptores()) {
-            if (suscriptor.sigueA(partido.getLocal()) || suscriptor.sigueA(partido.getVisitante())) {
-                destinatarios.add(suscriptor);
-            }
-        }
-        servicioNotificaciones.notificar(new Notificacion(partido, minuto, hecho), destinatarios);
-    }
-
     private void anularEvento(Partido partido) throws ReglaNegocioException {
         List<Evento> anulables = new ArrayList<>();
         for (Evento evento : partido.getEventos()) {
@@ -656,7 +673,7 @@ public class Menu {
             return;
         }
         String motivo = consola.leerTexto("Motivo de la anulación");
-        partido.anularEvento(evento, motivo);
+        controladorPartido.anularEvento(partido, evento, motivo);
         consola.mostrar("Evento anulado (queda registrado junto con su anulación). " + partido);
     }
 
@@ -674,15 +691,19 @@ public class Menu {
         }
     }
 
-    private void finalizarPartido(Torneo torneo, Partido partido) throws ReglaNegocioException {
-        partido.finalizar();
-        torneo.registrarSanciones(partido);
+    private void finalizarPartido(Torneo torneo, Partido partido)
+            throws ReglaNegocioException {
+
+        controladorPartido.finalizarPartido(
+                torneo, partido, datos.getSuscriptores());
+
         consola.mostrar("Partido finalizado: " + partido);
+
         if (!torneo.getSanciones().isEmpty()) {
             consola.mostrar("Sanciones del torneo:");
-            torneo.getSanciones().forEach(sancion -> consola.mostrar(" - " + sancion));
+            torneo.getSanciones().forEach(
+                    sancion -> consola.mostrar(" - " + sancion));
         }
-        notificar(partido, 90, "Final del partido: " + partido);
     }
 
     // ---------- CU10: suscripciones ----------
@@ -844,7 +865,7 @@ public class Menu {
             consola.mostrar("5) Probabilidad de clasificación de un club");
             consola.mostrar("0) Volver");
             switch (consola.leerEntero("Opción")) {
-                case 1 -> consola.mostrar(servicioReportes.generarTablaPosiciones(torneo));
+                case 1 -> consola.mostrar(controladorReportes.generarTablaPosiciones(torneo));
                 case 2 -> verGoleadores(torneo);
                 case 3 -> verValla(torneo);
                 case 4 -> verXG(torneo);
@@ -856,7 +877,7 @@ public class Menu {
     }
 
     private void verGoleadores(Torneo torneo) {
-        List<Goleador> goleadores = servicioReportes.obtenerGoleadores(torneo);
+        List<Goleador> goleadores = controladorReportes.obtenerGoleadores(torneo);
         consola.titulo("Goleadores");
         if (goleadores.isEmpty()) {
             consola.mostrar("(todavía no hay goles en partidos finalizados)");
@@ -867,7 +888,7 @@ public class Menu {
     }
 
     private void verValla(Torneo torneo) {
-        Club club = servicioReportes.obtenerVallaMenosVencida(torneo);
+        Club club = controladorReportes.obtenervallaMenosVencida(torneo);
         if (club == null) {
             consola.mostrar("Todavía no hay partidos finalizados.");
         } else {
@@ -880,8 +901,8 @@ public class Menu {
         if (partido == null) {
             return;
         }
-        consola.mostrar(String.format("xG de %s: %.2f", partido.getLocal(), partido.calcularXGClub(partido.getLocal())));
-        consola.mostrar(String.format("xG de %s: %.2f", partido.getVisitante(), partido.calcularXGClub(partido.getVisitante())));
+        consola.mostrar(String.format("xG de %s: %.2f", partido.getLocal(), controladorReportes.calcularXGClub(partido, partido.getLocal())));
+        consola.mostrar(String.format("xG de %s: %.2f", partido.getVisitante(), controladorReportes.calcularXGClub(partido, partido.getVisitante())));
     }
 
     private void verProbabilidad(Torneo torneo) {
@@ -902,7 +923,7 @@ public class Menu {
         } else {
             proyeccion = new ProyeccionPorXG();
         }
-        double probabilidad = servicioReportes.calcularProbabilidadClasificacion(torneo, club, proyeccion);
+        double probabilidad = controladorReportes.calcularProbabilidadClasificacion(torneo, club, proyeccion);
         consola.mostrar(String.format("Probabilidad de que %s clasifique: %.1f%% (%s)", club, probabilidad, metodo));
     }
 }
