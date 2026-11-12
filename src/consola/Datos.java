@@ -4,9 +4,13 @@ import excepcion.ReglaNegocioException;
 import modelo.Arbitro;
 import modelo.Club;
 import modelo.Entrenador;
+import modelo.EstadoTorneo;
 import modelo.Estadio;
+import modelo.Inscripcion;
 import modelo.Jugador;
+import modelo.Partido;
 import modelo.Sponsor;
+import modelo.TernaArbitral;
 import modelo.Torneo;
 import modelo.TipoTorneo;
 import notificaciones.AppMovil;
@@ -95,6 +99,81 @@ public class Datos implements Serializable {
             }
         }
         return false;
+    }
+
+    // CU01 (baja): solo se da de baja lo que no esta en uso
+
+    public void bajaClub(Club club) throws ReglaNegocioException {
+        for (int i = 0; i < torneos.size(); i++) {
+            if (torneos.get(i).estaInscripto(club)) {
+                throw new ReglaNegocioException(club + " esta inscripto en un torneo");
+            }
+        }
+        if (!jugadoresDe(club).isEmpty()) {
+            throw new ReglaNegocioException(club + " tiene jugadores con contrato vigente");
+        }
+        clubes.remove(club);
+    }
+
+    public void bajaJugador(Jugador jugador) throws ReglaNegocioException {
+        if (jugador.getContratoVigente() != null) {
+            throw new ReglaNegocioException(jugador + " tiene un contrato vigente");
+        }
+        for (int i = 0; i < torneos.size(); i++) {
+            List<Inscripcion> inscripciones = torneos.get(i).getInscripciones();
+            for (int j = 0; j < inscripciones.size(); j++) {
+                if (inscripciones.get(j).contiene(jugador)) {
+                    throw new ReglaNegocioException(jugador + " esta inscripto en el torneo " + torneos.get(i).getNombre());
+                }
+            }
+        }
+        jugadores.remove(jugador);
+    }
+
+    public void bajaEntrenador(Entrenador entrenador) throws ReglaNegocioException {
+        for (int i = 0; i < clubes.size(); i++) {
+            if (clubes.get(i).getEntrenador() == entrenador) {
+                throw new ReglaNegocioException(entrenador + " dirige a " + clubes.get(i));
+            }
+        }
+        entrenadores.remove(entrenador);
+    }
+
+    public void bajaArbitro(Arbitro arbitro) throws ReglaNegocioException {
+        List<Partido> partidos = todosLosPartidos();
+        for (int i = 0; i < partidos.size(); i++) {
+            TernaArbitral terna = partidos.get(i).getTerna();
+            if (terna != null && terna.getArbitros().contains(arbitro)) {
+                throw new ReglaNegocioException(arbitro + " esta asignado a un partido");
+            }
+        }
+        arbitros.remove(arbitro);
+    }
+
+    public void bajaEstadio(Estadio estadio) throws ReglaNegocioException {
+        List<Partido> partidos = todosLosPartidos();
+        for (int i = 0; i < partidos.size(); i++) {
+            if (partidos.get(i).getEstadio() == estadio) {
+                throw new ReglaNegocioException(estadio + " esta asignado a un partido");
+            }
+        }
+        estadios.remove(estadio);
+    }
+
+    // Junta los partidos de todos los torneos (lo usan bajaArbitro y bajaEstadio)
+    private List<Partido> todosLosPartidos() {
+        List<Partido> partidos = new ArrayList<>();
+        for (int i = 0; i < torneos.size(); i++) {
+            partidos.addAll(torneos.get(i).getPartidos());
+        }
+        return partidos;
+    }
+
+    public void bajaTorneo(Torneo torneo) throws ReglaNegocioException {
+        if (torneo.getEstado() != EstadoTorneo.PLANIFICADO) {
+            throw new ReglaNegocioException("Solo se puede dar de baja un torneo PLANIFICADO");
+        }
+        torneos.remove(torneo);
     }
 
     // Carga un torneo de ejemplo listo para usar: 4 clubes con 20 jugadores cada uno, fixture generado,

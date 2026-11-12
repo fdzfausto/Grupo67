@@ -62,6 +62,7 @@ public class Menu {
     private ControladorPartido controladorPartido;
     private ControladorReportes controladorReportes;
 
+    private static final List<String> CATEGORIAS = Arrays.asList("Club", "Jugador", "Entrenador", "Árbitro", "Estadio", "Torneo");
     private static final String ARCHIVO_DATOS = "futbolstats.dat";
 
     public Menu() {
@@ -167,6 +168,8 @@ public class Menu {
             consola.mostrar("5) Alta de árbitro");
             consola.mostrar("6) Alta de estadio");
             consola.mostrar("7) Alta de torneo");
+            consola.mostrar("8) Modificar datos");
+            consola.mostrar("9) Dar de baja");
             consola.mostrar("0) Volver");
             switch (consola.leerEntero("Opción")) {
                 case 1 -> verListados();
@@ -176,6 +179,8 @@ public class Menu {
                 case 5 -> ejecutar(this::altaArbitro);
                 case 6 -> ejecutar(this::altaEstadio);
                 case 7 -> ejecutar(this::altaTorneo);
+                case 8 -> ejecutar(this::modificarDatos);
+                case 9 -> ejecutar(this::darDeBaja);
                 case 0 -> volver = true;
                 default -> consola.mostrar("Opción inválida.");
             }
@@ -204,6 +209,89 @@ public class Menu {
         for (Object elemento : elementos) {
             consola.mostrar(" - " + elemento);
         }
+    }
+
+    // CU01: modificacion y baja
+    // El modelo valida cada dato nuevo y Datos controla que lo que se borra no este en uso.
+
+    private void modificarDatos() throws ReglaNegocioException {
+        String categoria = consola.elegir("¿Qué querés modificar?", CATEGORIAS);
+        if (categoria == null) {
+            return;
+        }
+        if (categoria.equals("Club")) {
+            Club club = consola.elegir("Club", datos.getClubes());
+            if (club != null) {
+                club.setSedeSocial(consola.leerTexto("Nueva sede social"));
+            }
+        } else if (categoria.equals("Jugador")) {
+            Jugador jugador = consola.elegir("Jugador", datos.getJugadores());
+            if (jugador != null) {
+                jugador.setNumeroCamiseta(consola.leerEntero("Nuevo número de camiseta"));
+                jugador.setValorMercado(consola.leerDecimal("Nuevo valor de mercado"));
+            }
+        } else if (categoria.equals("Entrenador")) {
+            Entrenador entrenador = consola.elegir("Entrenador", datos.getEntrenadores());
+            if (entrenador != null) {
+                entrenador.setLicencia(consola.leerTexto("Nueva licencia"));
+            }
+        } else if (categoria.equals("Árbitro")) {
+            Arbitro arbitro = consola.elegir("Árbitro", datos.getArbitros());
+            if (arbitro != null) {
+                arbitro.setCategoria(consola.leerTexto("Nueva categoría"));
+            }
+        } else if (categoria.equals("Estadio")) {
+            Estadio estadio = consola.elegir("Estadio", datos.getEstadios());
+            if (estadio != null) {
+                estadio.setCapacidad(consola.leerEntero("Nueva capacidad"));
+            }
+        } else {
+            Torneo torneo = consola.elegir("Torneo", datos.getTorneos());
+            if (torneo != null) {
+                torneo.modificarDatos(consola.leerTexto("Nuevo nombre"), consola.leerFecha("Nueva fecha de inicio"),
+                        consola.leerFecha("Nueva fecha de fin"));
+            }
+        }
+        consola.mostrar("Listo.");
+    }
+
+    private void darDeBaja() throws ReglaNegocioException {
+        String categoria = consola.elegir("¿Qué querés dar de baja?", CATEGORIAS);
+        if (categoria == null) {
+            return;
+        }
+        if (categoria.equals("Club")) {
+            Club club = consola.elegir("Club", datos.getClubes());
+            if (club != null) {
+                datos.bajaClub(club);
+            }
+        } else if (categoria.equals("Jugador")) {
+            Jugador jugador = consola.elegir("Jugador", datos.getJugadores());
+            if (jugador != null) {
+                datos.bajaJugador(jugador);
+            }
+        } else if (categoria.equals("Entrenador")) {
+            Entrenador entrenador = consola.elegir("Entrenador", datos.getEntrenadores());
+            if (entrenador != null) {
+                datos.bajaEntrenador(entrenador);
+            }
+        } else if (categoria.equals("Árbitro")) {
+            Arbitro arbitro = consola.elegir("Árbitro", datos.getArbitros());
+            if (arbitro != null) {
+                datos.bajaArbitro(arbitro);
+            }
+        } else if (categoria.equals("Estadio")) {
+            Estadio estadio = consola.elegir("Estadio", datos.getEstadios());
+            if (estadio != null) {
+                datos.bajaEstadio(estadio);
+            }
+        } else {
+            Torneo torneo = consola.elegir("Torneo", datos.getTorneos());
+            if (torneo != null) {
+                datos.bajaTorneo(torneo);
+            }
+        }
+        consola.mostrar("Listo.");
     }
 
     private void altaClub() throws ReglaNegocioException {
@@ -587,7 +675,7 @@ public class Menu {
                 nomina.agregarSuplente(jugador);
             }
         }
-        	controladorTorneo.cargarNomina(torneo, partido, nomina); // valida suspensiones y plantel inscripto (CU06)
+        controladorTorneo.cargarNomina(torneo, partido, nomina); // valida suspensiones y plantel inscripto (CU06)
         consola.mostrar("Nómina cargada: " + nomina);
     }
 

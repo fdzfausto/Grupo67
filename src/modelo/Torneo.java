@@ -289,6 +289,19 @@ public class Torneo implements Serializable {
         return fixture.getPartidos();
     }
 
+    // CU01 (modificacion): solo mientras el torneo esta PLANIFICADO
+    public void modificarDatos(String nombre, LocalDate fechaInicio, LocalDate fechaFin) throws ReglaNegocioException {
+        if (estado != EstadoTorneo.PLANIFICADO) {
+            throw new ReglaNegocioException("Solo se puede modificar un torneo PLANIFICADO");
+        }
+        if (nombre == null || nombre.trim().isEmpty() || fechaFin.isBefore(fechaInicio)) {
+            throw new ReglaNegocioException("Nombre vacio o fechas invalidas");
+        }
+        this.nombre = nombre;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+    }
+
     public List<Inscripcion> getInscripciones() {
         return new ArrayList<>(inscripciones);
     }

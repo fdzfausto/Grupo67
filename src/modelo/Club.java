@@ -1,5 +1,7 @@
 package modelo;
 
+import excepcion.ReglaNegocioException;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,6 +32,13 @@ public class Club implements Serializable {
 
     public String getSedeSocial() {
         return sedeSocial;
+    }
+
+    public void setSedeSocial(String sedeSocial) throws ReglaNegocioException {
+        if (sedeSocial == null || sedeSocial.trim().isEmpty()) {
+            throw new ReglaNegocioException("La sede social no puede estar vacia");
+        }
+        this.sedeSocial = sedeSocial;
     }
 
     public Entrenador getEntrenador() {
@@ -73,4 +82,3 @@ public class Club implements Serializable {
         return nombre;
     }
 }
-

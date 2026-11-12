@@ -32,15 +32,21 @@ public class Jugador extends Persona {
         return numeroCamiseta;
     }
 
-    public void setNumeroCamiseta(int numeroCamiseta) {
-        this.numeroCamiseta = numeroCamiseta;
-    }
-
     public double getValorMercado() {
         return valorMercado;
     }
 
-    public void setValorMercado(double valorMercado) {
+    public void setNumeroCamiseta(int numeroCamiseta) throws ReglaNegocioException {
+        if (numeroCamiseta < 1 || numeroCamiseta > 99) {
+            throw new ReglaNegocioException("El numero de camiseta tiene que estar entre 1 y 99");
+        }
+        this.numeroCamiseta = numeroCamiseta;
+    }
+
+    public void setValorMercado(double valorMercado) throws ReglaNegocioException {
+        if (valorMercado < 0) {
+            throw new ReglaNegocioException("El valor de mercado no puede ser negativo");
+        }
         this.valorMercado = valorMercado;
     }
 
