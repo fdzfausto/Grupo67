@@ -27,7 +27,7 @@ public class ControladorPartido {
         partido.suspender();
     }
 
-    public List<Evento> registrarEventos(Partido partido, Evento evento, List<Suscriptor> suscriptores) throws ReglaNegocioException {
+    public List<Evento> registrarEvento(Partido partido, Evento evento, List<Suscriptor> suscriptores) throws ReglaNegocioException {
         int cantidadAntes = partido.getEventos().size();
         partido.registrarEvento(evento);
         List<Evento> todos = partido.getEventos();
