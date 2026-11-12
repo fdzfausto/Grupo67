@@ -1,5 +1,7 @@
 package modelo;
 
+import excepcion.ReglaNegocioException;
+
 import java.io.Serializable;
 
 public class Estadio implements Serializable {
@@ -24,6 +26,13 @@ public class Estadio implements Serializable {
         this.direccion = direccion;
         this.clima = clima;
         this.terreno = "No informado";
+    }
+
+    public void setCapacidad(int capacidad) throws ReglaNegocioException {
+        if (capacidad <= 0) {
+            throw new ReglaNegocioException("La capacidad tiene que ser mayor a 0");
+        }
+        this.capacidad = capacidad;
     }
 
     public String getNombre() {

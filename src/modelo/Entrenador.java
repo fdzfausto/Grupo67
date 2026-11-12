@@ -1,5 +1,7 @@
 package modelo;
 
+import excepcion.ReglaNegocioException;
+
 import java.time.LocalDate;
 
 public class Entrenador extends Persona {
@@ -15,6 +17,13 @@ public class Entrenador extends Persona {
 
     public String getEspecialidad() {
         return especialidad;
+    }
+
+    public void setLicencia(String licencia) throws ReglaNegocioException {
+        if (licencia == null || licencia.trim().isEmpty()) {
+            throw new ReglaNegocioException("La licencia no puede estar vacia");
+        }
+        this.licencia = licencia;
     }
 
     public String getLicencia() {

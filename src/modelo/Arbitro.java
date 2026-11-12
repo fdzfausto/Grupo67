@@ -1,5 +1,7 @@
 package modelo;
 
+import excepcion.ReglaNegocioException;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,13 @@ public class Arbitro extends Persona { // herencia de Persona
 
     public String getCategoria() {
         return categoria;
+    }
+
+    public void setCategoria(String categoria) throws ReglaNegocioException {
+        if (categoria == null || categoria.trim().isEmpty()) {
+            throw new ReglaNegocioException("La categoria no puede estar vacia");
+        }
+        this.categoria = categoria;
     }
 
     public String getColegio() {
