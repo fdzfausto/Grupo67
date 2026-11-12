@@ -1,12 +1,12 @@
 package controlador;
 
+import java.util.List;
 import modelo.Club;
+import modelo.Partido;
 import modelo.Torneo;
 import reportes.Goleador;
 import reportes.MetodoProyeccion;
 import reportes.ServicioReportes;
-
-import java.util.List;
 
 public class ControladorReportes {
     private ServicioReportes servicioReportes;
@@ -30,4 +30,10 @@ public class ControladorReportes {
     public double calcularProbabilidadClasificacion(Torneo torneo, Club club, MetodoProyeccion metodo){
         return servicioReportes.calcularProbabilidadClasificacion(torneo, club, metodo);
     }
+
+    public double calcularXGClub(Partido partido, Club club) {
+        return partido.calcularXGClub(club);
+    }
+
+
 }
