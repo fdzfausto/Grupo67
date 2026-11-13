@@ -294,7 +294,8 @@ public class Torneo implements Serializable {
         if (estado != EstadoTorneo.PLANIFICADO) {
             throw new ReglaNegocioException("Solo se puede modificar un torneo PLANIFICADO");
         }
-        if (nombre == null || nombre.trim().isEmpty() || fechaFin.isBefore(fechaInicio)) {
+        if (nombre == null || nombre.trim().isEmpty() || fechaInicio == null || fechaFin == null
+                || fechaFin.isBefore(fechaInicio)) {
             throw new ReglaNegocioException("Nombre vacio o fechas invalidas");
         }
         this.nombre = nombre;

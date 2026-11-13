@@ -27,10 +27,12 @@ import modelo.Club;
 import modelo.Contrato;
 import modelo.Entrenador;
 import modelo.Estadio;
+import modelo.Inscripcion;
 import modelo.Jugador;
 import modelo.Nomina;
 import modelo.Partido;
 import modelo.Patrocinio;
+import modelo.Sancion;
 import modelo.Sponsor;
 import modelo.TernaArbitral;
 import modelo.TipoTorneo;
@@ -48,11 +50,6 @@ import reportes.ProyeccionPorXG;
 
 // Menú principal por consola. Solo coordina: pide los datos al usuario y delega las reglas en el modelo.
 public class Menu {
-
-    // Una opción del menú que puede fallar por una regla de negocio.
-    private interface Accion {
-        void ejecutar() throws ReglaNegocioException;
-    }
 
     private Consola consola;
     private Datos datos;
@@ -111,13 +108,9 @@ public class Menu {
         }
     }
 
-    // Ejecuta una opción: si una regla de negocio no se cumple, muestra el motivo y vuelve al menú.
-    private void ejecutar(Accion accion) {
-        try {
-            accion.ejecutar();
-        } catch (ReglaNegocioException e) {
-            consola.mostrar("No se pudo completar la operación: " + e.getMessage());
-        }
+    // Si una regla de negocio no se cumple, cada menú muestra el motivo con este método y vuelve al menú.
+    private void mostrarError(ReglaNegocioException e) {
+        consola.mostrar("No se pudo completar la operación: " + e.getMessage());
     }
 
     // ---------- Menú principal ----------
@@ -135,20 +128,42 @@ public class Menu {
             consola.mostrar("7) Reportes y proyecciones");
             consola.mostrar("8) Cargar datos de demostración");
             consola.mostrar("0) Salir");
-            switch (consola.leerEntero("Opción")) {
-                case 1 -> menuDatos();
-                case 2 -> menuContratos();
-                case 3 -> menuTorneos();
-                case 4 -> menuPartidos();
-                case 5 -> menuSuscripciones();
-                case 6 -> menuPatrocinios();
-                case 7 -> menuReportes();
-                case 8 -> ejecutar(() -> {
-                    datos.cargarDemostracion();
-                    consola.mostrar("Datos de demostración cargados: torneo con 4 clubes y fixture generado.");
-                });
-                case 0 -> salir = true;
-                default -> consola.mostrar("Opción inválida.");
+            int opcion = consola.leerEntero("Opción");
+            try {
+                switch (opcion) {
+                    case 1:
+                        menuDatos();
+                        break;
+                    case 2:
+                        menuContratos();
+                        break;
+                    case 3:
+                        menuTorneos();
+                        break;
+                    case 4:
+                        menuPartidos();
+                        break;
+                    case 5:
+                        menuSuscripciones();
+                        break;
+                    case 6:
+                        menuPatrocinios();
+                        break;
+                    case 7:
+                        menuReportes();
+                        break;
+                    case 8:
+                        datos.cargarDemostracion();
+                        consola.mostrar("Datos de demostración cargados: torneo con 4 clubes y fixture generado.");
+                        break;
+                    case 0:
+                        salir = true;
+                        break;
+                    default:
+                        consola.mostrar("Opción inválida.");
+                }
+            } catch (ReglaNegocioException e) {
+                mostrarError(e);
             }
         }
         consola.mostrar("Hasta luego.");
@@ -171,18 +186,44 @@ public class Menu {
             consola.mostrar("8) Modificar datos");
             consola.mostrar("9) Dar de baja");
             consola.mostrar("0) Volver");
-            switch (consola.leerEntero("Opción")) {
-                case 1 -> verListados();
-                case 2 -> ejecutar(this::altaClub);
-                case 3 -> ejecutar(this::altaJugador);
-                case 4 -> ejecutar(this::altaEntrenador);
-                case 5 -> ejecutar(this::altaArbitro);
-                case 6 -> ejecutar(this::altaEstadio);
-                case 7 -> ejecutar(this::altaTorneo);
-                case 8 -> ejecutar(this::modificarDatos);
-                case 9 -> ejecutar(this::darDeBaja);
-                case 0 -> volver = true;
-                default -> consola.mostrar("Opción inválida.");
+            int opcion = consola.leerEntero("Opción");
+            try {
+                switch (opcion) {
+                    case 1:
+                        verListados();
+                        break;
+                    case 2:
+                        altaClub();
+                        break;
+                    case 3:
+                        altaJugador();
+                        break;
+                    case 4:
+                        altaEntrenador();
+                        break;
+                    case 5:
+                        altaArbitro();
+                        break;
+                    case 6:
+                        altaEstadio();
+                        break;
+                    case 7:
+                        altaTorneo();
+                        break;
+                    case 8:
+                        modificarDatos();
+                        break;
+                    case 9:
+                        darDeBaja();
+                        break;
+                    case 0:
+                        volver = true;
+                        break;
+                    default:
+                        consola.mostrar("Opción inválida.");
+                }
+            } catch (ReglaNegocioException e) {
+                mostrarError(e);
             }
         }
     }
@@ -193,14 +234,25 @@ public class Menu {
         if (categoria == null) {
             return;
         }
-        List<?> elementos;
+        List<Object> elementos = new ArrayList<>();
         switch (categoria) {
-            case "Clubes" -> elementos = datos.getClubes();
-            case "Jugadores" -> elementos = datos.getJugadores();
-            case "Entrenadores" -> elementos = datos.getEntrenadores();
-            case "Árbitros" -> elementos = datos.getArbitros();
-            case "Estadios" -> elementos = datos.getEstadios();
-            default -> elementos = datos.getTorneos();
+            case "Clubes":
+                elementos.addAll(datos.getClubes());
+                break;
+            case "Jugadores":
+                elementos.addAll(datos.getJugadores());
+                break;
+            case "Entrenadores":
+                elementos.addAll(datos.getEntrenadores());
+                break;
+            case "Árbitros":
+                elementos.addAll(datos.getArbitros());
+                break;
+            case "Estadios":
+                elementos.addAll(datos.getEstadios());
+                break;
+            default:
+                elementos.addAll(datos.getTorneos());
         }
         consola.titulo(categoria);
         if (elementos.isEmpty()) {
@@ -420,13 +472,29 @@ public class Menu {
             consola.mostrar("3) Rescindir contrato");
             consola.mostrar("4) Ver historial de contratos de un jugador");
             consola.mostrar("0) Volver");
-            switch (consola.leerEntero("Opción")) {
-                case 1 -> ejecutar(this::registrarContrato);
-                case 2 -> ejecutar(this::transferirJugador);
-                case 3 -> ejecutar(this::rescindirContrato);
-                case 4 -> verHistorial();
-                case 0 -> volver = true;
-                default -> consola.mostrar("Opción inválida.");
+            int opcion = consola.leerEntero("Opción");
+            try {
+                switch (opcion) {
+                    case 1:
+                        registrarContrato();
+                        break;
+                    case 2:
+                        transferirJugador();
+                        break;
+                    case 3:
+                        rescindirContrato();
+                        break;
+                    case 4:
+                        verHistorial();
+                        break;
+                    case 0:
+                        volver = true;
+                        break;
+                    default:
+                        consola.mostrar("Opción inválida.");
+                }
+            } catch (ReglaNegocioException e) {
+                mostrarError(e);
             }
         }
     }
@@ -511,13 +579,29 @@ public class Menu {
             consola.mostrar("3) Ver el fixture");
             consola.mostrar("4) Avanzar el estado del torneo");
             consola.mostrar("0) Volver");
-            switch (consola.leerEntero("Opción")) {
-                case 1 -> ejecutar(this::inscribirClub);
-                case 2 -> ejecutar(this::generarFixture);
-                case 3 -> verFixture();
-                case 4 -> ejecutar(this::avanzarEstado);
-                case 0 -> volver = true;
-                default -> consola.mostrar("Opción inválida.");
+            int opcion = consola.leerEntero("Opción");
+            try {
+                switch (opcion) {
+                    case 1:
+                        inscribirClub();
+                        break;
+                    case 2:
+                        generarFixture();
+                        break;
+                    case 3:
+                        verFixture();
+                        break;
+                    case 4:
+                        avanzarEstado();
+                        break;
+                    case 0:
+                        volver = true;
+                        break;
+                    default:
+                        consola.mostrar("Opción inválida.");
+                }
+            } catch (ReglaNegocioException e) {
+                mostrarError(e);
             }
         }
     }
@@ -601,23 +685,43 @@ public class Menu {
             consola.mostrar("7) Finalizar el partido");
             consola.mostrar("8) Suspender el partido");
             consola.mostrar("0) Volver");
-            switch (consola.leerEntero("Opción")) {
-                case 1 -> ejecutar(() -> programarPartido(torneo, partido));
-                case 2 -> ejecutar(() -> cargarNomina(torneo, partido));
-                case 3 -> ejecutar(() -> {
-                    controladorPartido.iniciarPartido(partido);
-                    consola.mostrar("El partido está EN_JUEGO.");
-                });
-                case 4 -> ejecutar(() -> registrarEvento(partido));
-                case 5 -> ejecutar(() -> anularEvento(partido));
-                case 6 -> verEventos(partido);
-                case 7 -> ejecutar(() -> finalizarPartido(torneo, partido));
-                case 8 -> ejecutar(() -> {
-                    controladorPartido.suspenderPartido(partido);
-                    consola.mostrar("El partido quedó SUSPENDIDO.");
-                });
-                case 0 -> volver = true;
-                default -> consola.mostrar("Opción inválida.");
+            int opcion = consola.leerEntero("Opción");
+            try {
+                switch (opcion) {
+                    case 1:
+                        programarPartido(torneo, partido);
+                        break;
+                    case 2:
+                        cargarNomina(torneo, partido);
+                        break;
+                    case 3:
+                        controladorPartido.iniciarPartido(partido);
+                        consola.mostrar("El partido está EN_JUEGO.");
+                        break;
+                    case 4:
+                        registrarEvento(partido);
+                        break;
+                    case 5:
+                        anularEvento(partido);
+                        break;
+                    case 6:
+                        verEventos(partido);
+                        break;
+                    case 7:
+                        finalizarPartido(torneo, partido);
+                        break;
+                    case 8:
+                        controladorPartido.suspenderPartido(partido);
+                        consola.mostrar("El partido quedó SUSPENDIDO.");
+                        break;
+                    case 0:
+                        volver = true;
+                        break;
+                    default:
+                        consola.mostrar("Opción inválida.");
+                }
+            } catch (ReglaNegocioException e) {
+                mostrarError(e);
             }
         }
     }
@@ -789,8 +893,9 @@ public class Menu {
 
         if (!torneo.getSanciones().isEmpty()) {
             consola.mostrar("Sanciones del torneo:");
-            torneo.getSanciones().forEach(
-                    sancion -> consola.mostrar(" - " + sancion));
+            for (Sancion sancion : torneo.getSanciones()) {
+                consola.mostrar(" - " + sancion);
+            }
         }
     }
 
@@ -805,13 +910,29 @@ public class Menu {
             consola.mostrar("3) Seguir un club");
             consola.mostrar("4) Ver suscriptores");
             consola.mostrar("0) Volver");
-            switch (consola.leerEntero("Opción")) {
-                case 1 -> ejecutar(this::altaSuscriptor);
-                case 2 -> ejecutar(this::configurarCanales);
-                case 3 -> ejecutar(this::seguirClub);
-                case 4 -> verSuscriptores();
-                case 0 -> volver = true;
-                default -> consola.mostrar("Opción inválida.");
+            int opcion = consola.leerEntero("Opción");
+            try {
+                switch (opcion) {
+                    case 1:
+                        altaSuscriptor();
+                        break;
+                    case 2:
+                        configurarCanales();
+                        break;
+                    case 3:
+                        seguirClub();
+                        break;
+                    case 4:
+                        verSuscriptores();
+                        break;
+                    case 0:
+                        volver = true;
+                        break;
+                    default:
+                        consola.mostrar("Opción inválida.");
+                }
+            } catch (ReglaNegocioException e) {
+                mostrarError(e);
             }
         }
     }
@@ -870,13 +991,29 @@ public class Menu {
             consola.mostrar("3) Patrocinar un torneo");
             consola.mostrar("4) Ver patrocinios");
             consola.mostrar("0) Volver");
-            switch (consola.leerEntero("Opción")) {
-                case 1 -> altaSponsor();
-                case 2 -> ejecutar(this::patrocinarClub);
-                case 3 -> ejecutar(this::patrocinarTorneo);
-                case 4 -> verPatrocinios();
-                case 0 -> volver = true;
-                default -> consola.mostrar("Opción inválida.");
+            int opcion = consola.leerEntero("Opción");
+            try {
+                switch (opcion) {
+                    case 1:
+                        altaSponsor();
+                        break;
+                    case 2:
+                        patrocinarClub();
+                        break;
+                    case 3:
+                        patrocinarTorneo();
+                        break;
+                    case 4:
+                        verPatrocinios();
+                        break;
+                    case 0:
+                        volver = true;
+                        break;
+                    default:
+                        consola.mostrar("Opción inválida.");
+                }
+            } catch (ReglaNegocioException e) {
+                mostrarError(e);
             }
         }
     }
@@ -953,13 +1090,26 @@ public class Menu {
             consola.mostrar("5) Probabilidad de clasificación de un club");
             consola.mostrar("0) Volver");
             switch (consola.leerEntero("Opción")) {
-                case 1 -> consola.mostrar(controladorReportes.generarTablaPosiciones(torneo));
-                case 2 -> verGoleadores(torneo);
-                case 3 -> verValla(torneo);
-                case 4 -> verXG(torneo);
-                case 5 -> verProbabilidad(torneo);
-                case 0 -> volver = true;
-                default -> consola.mostrar("Opción inválida.");
+                case 1:
+                    consola.mostrar(controladorReportes.generarTablaPosiciones(torneo));
+                    break;
+                case 2:
+                    verGoleadores(torneo);
+                    break;
+                case 3:
+                    verValla(torneo);
+                    break;
+                case 4:
+                    verXG(torneo);
+                    break;
+                case 5:
+                    verProbabilidad(torneo);
+                    break;
+                case 0:
+                    volver = true;
+                    break;
+                default:
+                    consola.mostrar("Opción inválida.");
             }
         }
     }
@@ -995,7 +1145,9 @@ public class Menu {
 
     private void verProbabilidad(Torneo torneo) {
         List<Club> clubes = new ArrayList<>();
-        torneo.getInscripciones().forEach(inscripcion -> clubes.add(inscripcion.getClub()));
+        for (Inscripcion inscripcion : torneo.getInscripciones()) {
+            clubes.add(inscripcion.getClub());
+        }
         Club club = consola.elegir("Club", clubes);
         if (club == null) {
             return;
