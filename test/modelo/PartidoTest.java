@@ -17,7 +17,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PartidoTest {
@@ -48,19 +48,34 @@ class PartidoTest {
 
     @Test
     void unPartidoNoPuedeEnfrentarAUnClubConsigoMismo() {
-        assertThrows(ReglaNegocioException.class, () -> new Partido(local, local));
+        try {
+            new Partido(local, local);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
     void noSeRegistranEventosSiElPartidoNoEstaEnJuego() throws ReglaNegocioException {
         Gol gol = new Gol(10, plantelLocal.get(0), local, TipoGol.A_FAVOR);
-        assertThrows(ReglaNegocioException.class, () -> partido.registrarEvento(gol));
+        try {
+            partido.registrarEvento(gol);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
     void noSePuedeIniciarSinLasDosNominas() throws ReglaNegocioException {
         partido.cargarNomina(DatosPrueba.nomina(local, plantelLocal), new Inscripcion(local, plantelLocal));
-        assertThrows(ReglaNegocioException.class, () -> partido.iniciar());
+        try {
+            partido.iniciar();
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -68,7 +83,12 @@ class PartidoTest {
         Nomina incompleta = new Nomina(local);
         incompleta.agregarTitular(plantelLocal.get(0));
         Inscripcion inscripcion = new Inscripcion(local, plantelLocal);
-        assertThrows(ReglaNegocioException.class, () -> partido.cargarNomina(incompleta, inscripcion));
+        try {
+            partido.cargarNomina(incompleta, inscripcion);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -99,7 +119,12 @@ class PartidoTest {
         iniciarPartido();
         Jugador fueraDeNomina = plantelLocal.get(18);
         Gol gol = new Gol(20, fueraDeNomina, local, TipoGol.A_FAVOR);
-        assertThrows(ReglaNegocioException.class, () -> partido.registrarEvento(gol));
+        try {
+            partido.registrarEvento(gol);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -118,7 +143,12 @@ class PartidoTest {
         Jugador jugador = plantelLocal.get(4);
         partido.registrarEvento(new Tarjeta(20, jugador, local, ColorTarjeta.ROJA));
         Remate remate = new Remate(40, jugador, local, ZonaRemate.AREA_GRANDE);
-        assertThrows(ReglaNegocioException.class, () -> partido.registrarEvento(remate));
+        try {
+            partido.registrarEvento(remate);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -127,7 +157,12 @@ class PartidoTest {
         Jugador expulsado = plantelLocal.get(4);
         partido.registrarEvento(new Tarjeta(20, expulsado, local, ColorTarjeta.ROJA));
         Cambio cambio = new Cambio(50, expulsado, plantelLocal.get(11), local);
-        assertThrows(ReglaNegocioException.class, () -> partido.registrarEvento(cambio));
+        try {
+            partido.registrarEvento(cambio);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -136,7 +171,12 @@ class PartidoTest {
         Jugador sale = plantelLocal.get(3);
         partido.registrarEvento(new Cambio(46, sale, plantelLocal.get(11), local));
         Remate remate = new Remate(70, sale, local, ZonaRemate.AREA_CHICA);
-        assertThrows(ReglaNegocioException.class, () -> partido.registrarEvento(remate));
+        try {
+            partido.registrarEvento(remate);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -146,7 +186,12 @@ class PartidoTest {
             partido.registrarEvento(new Cambio(60 + i, plantelLocal.get(i), plantelLocal.get(11 + i), local));
         }
         Cambio sexto = new Cambio(80, plantelLocal.get(5), plantelLocal.get(16), local);
-        assertThrows(ReglaNegocioException.class, () -> partido.registrarEvento(sexto));
+        try {
+            partido.registrarEvento(sexto);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -176,7 +221,12 @@ class PartidoTest {
         Gol gol = new Gol(10, plantelLocal.get(0), local, TipoGol.A_FAVOR);
         partido.registrarEvento(gol);
         partido.anularEvento(gol, "Error de carga");
-        assertThrows(ReglaNegocioException.class, () -> partido.anularEvento(gol, "Otra vez"));
+        try {
+            partido.anularEvento(gol, "Otra vez");
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -209,6 +259,11 @@ class PartidoTest {
     void soloSePuedeSuspenderUnPartidoProgramadoOEnJuego() throws ReglaNegocioException {
         iniciarPartido();
         partido.finalizar();
-        assertThrows(ReglaNegocioException.class, () -> partido.suspender());
+        try {
+            partido.suspender();
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 }
