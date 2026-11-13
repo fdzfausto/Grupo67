@@ -14,7 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TorneoTest {
@@ -58,14 +58,24 @@ class TorneoTest {
 
     @Test
     void elTorneoNoPuedeTenerFechaDeFinAnteriorALaDeInicio() {
-        assertThrows(ReglaNegocioException.class, () -> new Torneo("Copa", LocalDate.of(2026, 5, 1),
-                LocalDate.of(2026, 4, 1), TipoTorneo.NACIONAL, 1, 0));
+        try {
+            new Torneo("Copa", LocalDate.of(2026, 5, 1),
+                LocalDate.of(2026, 4, 1), TipoTorneo.NACIONAL, 1, 0);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
     void noSePuedeIniciarConMenosDeCuatroClubes() throws ReglaNegocioException {
         inscribirClubes(3);
-        assertThrows(ReglaNegocioException.class, () -> torneo.avanzarEstado());
+        try {
+            torneo.avanzarEstado();
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
         assertEquals(EstadoTorneo.PLANIFICADO, torneo.getEstado());
     }
 
@@ -76,7 +86,12 @@ class TorneoTest {
         assertEquals(EstadoTorneo.EN_CURSO, torneo.getEstado());
         torneo.avanzarEstado();
         assertEquals(EstadoTorneo.FINALIZADO, torneo.getEstado());
-        assertThrows(ReglaNegocioException.class, () -> torneo.avanzarEstado());
+        try {
+            torneo.avanzarEstado();
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -85,20 +100,35 @@ class TorneoTest {
         torneo.avanzarEstado();
         Club nuevo = DatosPrueba.club("San Lorenzo");
         List<Jugador> plantel = DatosPrueba.plantel(9);
-        assertThrows(ReglaNegocioException.class, () -> torneo.inscribirClub(nuevo, plantel));
+        try {
+            torneo.inscribirClub(nuevo, plantel);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
     void unClubSoloSePuedeInscribirUnaVezEnElTorneo() throws ReglaNegocioException {
         inscribirClubes(1);
         List<Jugador> otroPlantel = DatosPrueba.plantel(8);
-        assertThrows(ReglaNegocioException.class, () -> torneo.inscribirClub(clubes.get(0), otroPlantel));
+        try {
+            torneo.inscribirClub(clubes.get(0), otroPlantel);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
     void elPlantelDebeTenerEntre18Y30Jugadores() {
         List<Jugador> corto = DatosPrueba.plantel(7).subList(0, 17);
-        assertThrows(ReglaNegocioException.class, () -> torneo.inscribirClub(clubes.get(0), corto));
+        try {
+            torneo.inscribirClub(clubes.get(0), corto);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
         assertTrue(torneo.getInscripciones().isEmpty());
     }
 
@@ -108,7 +138,12 @@ class TorneoTest {
         // El plantel de Boca incluye a un jugador que ya está inscripto con River.
         List<Jugador> plantelConRepetido = new ArrayList<>(planteles.get(1));
         plantelConRepetido.set(0, planteles.get(0).get(0));
-        assertThrows(ReglaNegocioException.class, () -> torneo.inscribirClub(clubes.get(1), plantelConRepetido));
+        try {
+            torneo.inscribirClub(clubes.get(1), plantelConRepetido);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     // ---------- Fixture ----------
@@ -116,7 +151,12 @@ class TorneoTest {
     @Test
     void noSeGeneraElFixtureConMenosDeCuatroClubes() throws ReglaNegocioException {
         inscribirClubes(3);
-        assertThrows(ReglaNegocioException.class, () -> torneo.generarFixture());
+        try {
+            torneo.generarFixture();
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -143,8 +183,13 @@ class TorneoTest {
         Partido partido = fixtureConPrimerPartido();
         Estadio estadio = DatosPrueba.estadio("Monumental");
         TernaArbitral terna = DatosPrueba.terna(10, "nacional");
-        assertThrows(ReglaNegocioException.class, () -> torneo.programarPartido(partido,
-                LocalDateTime.of(2027, 1, 10, 18, 0), estadio, terna));
+        try {
+            torneo.programarPartido(partido,
+                LocalDateTime.of(2027, 1, 10, 18, 0), estadio, terna);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
         assertEquals(EstadoPartido.SIN_PROGRAMAR, partido.getEstado());
     }
 
@@ -157,8 +202,13 @@ class TorneoTest {
         Estadio estadio = DatosPrueba.estadio("Monumental");
         torneo.programarPartido(primero, LocalDateTime.of(2026, 5, 10, 18, 0), estadio, DatosPrueba.terna(10, "nacional"));
         TernaArbitral otraTerna = DatosPrueba.terna(20, "nacional");
-        assertThrows(ReglaNegocioException.class, () -> torneo.programarPartido(segundo,
-                LocalDateTime.of(2026, 5, 10, 20, 0), estadio, otraTerna));
+        try {
+            torneo.programarPartido(segundo,
+                LocalDateTime.of(2026, 5, 10, 20, 0), estadio, otraTerna);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
         // Con 3 horas de diferencia ya es posible.
         torneo.programarPartido(segundo, LocalDateTime.of(2026, 5, 10, 21, 0), estadio, otraTerna);
         assertEquals(EstadoPartido.PROGRAMADO, segundo.getEstado());
@@ -182,8 +232,13 @@ class TorneoTest {
                 DatosPrueba.estadio("Monumental"), DatosPrueba.terna(10, "nacional"));
         Estadio otroEstadio = DatosPrueba.estadio("Bombonera");
         TernaArbitral otraTerna = DatosPrueba.terna(20, "nacional");
-        assertThrows(ReglaNegocioException.class, () -> torneo.programarPartido(otro,
-                LocalDateTime.of(2026, 5, 11, 18, 0), otroEstadio, otraTerna));
+        try {
+            torneo.programarPartido(otro,
+                LocalDateTime.of(2026, 5, 11, 18, 0), otroEstadio, otraTerna);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
         torneo.programarPartido(otro, LocalDateTime.of(2026, 5, 12, 18, 0), otroEstadio, otraTerna);
         assertEquals(EstadoPartido.PROGRAMADO, otro.getEstado());
     }
@@ -197,8 +252,13 @@ class TorneoTest {
         TernaArbitral terna = DatosPrueba.terna(10, "nacional");
         torneo.programarPartido(primero, LocalDateTime.of(2026, 5, 10, 12, 0), DatosPrueba.estadio("Monumental"), terna);
         Estadio otroEstadio = DatosPrueba.estadio("Bombonera");
-        assertThrows(ReglaNegocioException.class, () -> torneo.programarPartido(segundo,
-                LocalDateTime.of(2026, 5, 10, 20, 0), otroEstadio, terna));
+        try {
+            torneo.programarPartido(segundo,
+                LocalDateTime.of(2026, 5, 10, 20, 0), otroEstadio, terna);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -207,8 +267,13 @@ class TorneoTest {
         TernaArbitral terna = DatosPrueba.terna(10, "nacional");
         terna.getPrincipal().agregarClubHincha(partido.getLocal());
         Estadio estadio = DatosPrueba.estadio("Monumental");
-        assertThrows(ReglaNegocioException.class, () -> torneo.programarPartido(partido,
-                LocalDateTime.of(2026, 5, 10, 18, 0), estadio, terna));
+        try {
+            torneo.programarPartido(partido,
+                LocalDateTime.of(2026, 5, 10, 18, 0), estadio, terna);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -221,8 +286,13 @@ class TorneoTest {
         copa.generarFixture();
         Partido partido = copa.getPartidos().get(0);
         Estadio estadio = DatosPrueba.estadio("Monumental");
-        assertThrows(ReglaNegocioException.class, () -> copa.programarPartido(partido,
-                LocalDateTime.of(2026, 5, 10, 18, 0), estadio, DatosPrueba.terna(10, "nacional")));
+        try {
+            copa.programarPartido(partido,
+                LocalDateTime.of(2026, 5, 10, 18, 0), estadio, DatosPrueba.terna(10, "nacional"));
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
         copa.programarPartido(partido, LocalDateTime.of(2026, 5, 10, 18, 0), estadio,
                 DatosPrueba.terna(10, "internacional"));
         assertEquals(EstadoPartido.PROGRAMADO, partido.getEstado());
@@ -276,7 +346,12 @@ class TorneoTest {
         torneo.programarPartido(proximo, LocalDateTime.of(2026, 5, 20, 18, 0),
                 DatosPrueba.estadio("Bombonera"), DatosPrueba.terna(30, "nacional"));
         Nomina nomina = DatosPrueba.nomina(club, plantelDe(club)); // incluye al suspendido
-        assertThrows(ReglaNegocioException.class, () -> torneo.cargarNomina(proximo, nomina));
+        try {
+            torneo.cargarNomina(proximo, nomina);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 
     @Test
@@ -307,6 +382,11 @@ class TorneoTest {
         Partido partido = partidoEnJuego();
         partido.finalizar();
         torneo.registrarSanciones(partido);
-        assertThrows(ReglaNegocioException.class, () -> torneo.registrarSanciones(partido));
+        try {
+            torneo.registrarSanciones(partido);
+            fail("Debía lanzar ReglaNegocioException");
+        } catch (ReglaNegocioException e) {
+            // correcto: la regla de negocio rechazó la operación
+        }
     }
 }
